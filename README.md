@@ -7,7 +7,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Primary home flow: browse Buddy profiles and send direct invitations
 - Scheduled invitations: the requester proposes a date/time and the Buddy accepts or declines
 - Secondary flow: public area-based companion requests
-- Visitors can browse public requests and public profile fields before signup
+- Public requests and public profile fields can be browsed before signup; public request URLs can be shared through social media or messaging
 - Verified Buddies can apply; only the requester sees the applicant list, compares Buddy profiles and 30-minute rates, then selects one Buddy before the deadline
 - Exact meeting details are separated and exposed only to matched participants
 - Direct invitations remain a separate flow
@@ -26,6 +26,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Launch with the Buddy referral program: tracked referral links, points redeemable toward the user's Buddy booking, and public nationwide monthly/all-time rankings
 - Each redeemable service point is worth JPY 1 at booking
 - After Buddy verification, present a prewritten social share message and a unique tracked public-profile link; users choose whether to share through the system share sheet
+- Public request pages have shareable URLs that can be sent through social media or messaging; keep exact meeting details and applicant lists private
 - Primary MVP success metric: number of matches formed
 - Initial target: 10 matches in the first month
 
