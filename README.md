@@ -35,11 +35,12 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Give each approved Buddy a unique tracked profile/referral link and a ready-to-share social post
 - Attribute new Buddy applications to the referring profile
 - Keep an admin contribution ledger for applications, approved profiles, first completed paid matches, contribution scores, redeemable service points, and rankings
-- Award contribution scores and service points for quality milestones rather than raw applications: approval is the first qualifying milestone, with an additional milestone when the referred Buddy completes a first paid match
+- For a directly referred Buddy, award 100 service points when their profile passes review, then an additional 400 points when they complete their first paid match (500 points total)
+- Award contribution scores and service points for quality milestones rather than raw applications
 - Track contribution scores separately from redeemable service points, so using points does not lower a person's ranking
 - Redeemable service points are for the user's side of a future Buddy booking; they cannot be cashed out or transferred
 - Keep the Buddy's agreed compensation intact when a customer uses points; the platform funds the point discount
-- The redemption conversion is fixed at 1 point = JPY 1; the number of points awarded for each milestone is not set yet
+- Each redeemable service point is worth JPY 1; contribution score values are tracked separately
 - Show nationwide monthly and all-time rankings to all app users
 - When gift-card rewards launch later, start by rewarding the top 3 of the monthly ranking with Starbucks or Amazon gift cards
 - Start with contribution scores, redeemable service points, and rankings; plan to add gift-card rewards later
