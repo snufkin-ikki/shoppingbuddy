@@ -49,6 +49,7 @@ class BuddyDirectory extends StatefulWidget {
 
 class _BuddyDirectoryState extends State<BuddyDirectory> {
   String area = '下北沢';
+  final Set<String> selectedBuddyNames = {};
 
   final buddies = const [
     {'name': 'Mana', 'tagline': '古着と小さなギャラリーが好き', 'tags': '衣・遊', 'rate': '1,000円 / 30分', 'initial': 'M'},
@@ -68,12 +69,25 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
     );
   }
 
-  void openInvite(Map<String, String> buddy) {
-    showModalBottomSheet<void>(
+  Future<void> openInvite(List<Map<String, String>> invitees) async {
+    final duration = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      builder: (_) => InviteSheet(buddyName: buddy['name']!),
+      builder: (_) => InviteSheet(
+        buddyNames: invitees.map((buddy) => buddy['name']!).join('、'),
+      ),
+    );
+    if (duration == null || !mounted) return;
+    setState(() => selectedBuddyNames.clear());
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (_) => DemoDirectInviteResultSheet(
+        invitees: invitees,
+        duration: duration,
+      ),
     );
   }
 
@@ -140,6 +154,17 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
                       Text(buddy['tagline']!, style: const TextStyle(fontSize: 13)),
                     ],
                   )),
+                  Checkbox(
+                    value: selectedBuddyNames.contains(buddy['name']),
+                    onChanged: (selected) => setState(() {
+                      final name = buddy['name']!;
+                      if (selected == true) {
+                        selectedBuddyNames.add(name);
+                      } else {
+                        selectedBuddyNames.remove(name);
+                      }
+                    }),
+                  ),
                 ]),
                 const SizedBox(height: 10),
                 Text('カテゴリ：' + buddy['tags']!),
@@ -149,7 +174,7 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: () => openInvite(buddy),
+                    onPressed: () => openInvite([buddy]),
                     child: const Text('このBuddyを誘う'),
                   ),
                 ),
@@ -157,6 +182,20 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
             ),
           ),
         )),
+        if (selectedBuddyNames.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => openInvite(
+                buddies.where((buddy) =>
+                  selectedBuddyNames.contains(buddy['name'])).toList(),
+              ),
+              icon: const Icon(Icons.send),
+              label: Text('選択した' + selectedBuddyNames.length.toString() + '人にまとめて誘う'),
+            ),
+          ),
+        ],
         const SizedBox(height: 18),
         OutlinedButton.icon(
           onPressed: openPublicBoard,
@@ -169,9 +208,138 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
 }
 
 
+class DemoDirectInviteResultSheet extends StatefulWidget {
+  const DemoDirectInviteResultSheet({
+    super.key,
+    required this.invitees,
+    required this.duration,
+  });
+  final List<Map<String, String>> invitees;
+  final int duration;
+
+  @override
+  State<DemoDirectInviteResultSheet> createState() =>
+      _DemoDirectInviteResultSheetState();
+}
+
+class _DemoDirectInviteResultSheetState
+    extends State<DemoDirectInviteResultSheet> {
+  final Map<String, bool?> responses = {};
+  bool paid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final buddy in widget.invitees) {
+      responses[buddy['name']!] = null;
+    }
+  }
+
+  bool get allResponded => widget.invitees.every(
+    (buddy) => responses[buddy['name']!] != null,
+  );
+
+  List<Map<String, String>> get accepted => widget.invitees.where(
+    (buddy) => responses[buddy['name']!] == true,
+  ).toList();
+
+  int ratePer30m(Map<String, String> buddy) =>
+      int.tryParse(buddy['rate']!.replaceAll(',', '').split('円').first) ?? 0;
+
+  int get total => accepted.fold<int>(
+    0,
+    (sum, buddy) => sum + ratePer30m(buddy) * widget.duration ~/ 30,
+  );
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      22, 22, 22, MediaQuery.viewInsetsOf(context).bottom + 24,
+    ),
+    child: SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Buddyの返事を待っています',
+              style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 6),
+            const Text('全員の返事がそろってから、承諾したBuddyとのマッチングが成立します。'),
+            const SizedBox(height: 14),
+            ...widget.invitees.map((buddy) {
+              final name = buddy['name']!;
+              final response = responses[name];
+              return Card(
+                color: Colors.white,
+                child: ListTile(
+                  title: Text(name + ' · ' + buddy['rate']!),
+                  subtitle: Text(response == null
+                    ? '返事待ち（デモ）'
+                    : response ? '承諾（デモ）' : '辞退（デモ）'),
+                  trailing: response == null
+                    ? Wrap(
+                        spacing: 0,
+                        children: [
+                          IconButton(
+                            tooltip: '承諾',
+                            onPressed: () => setState(() => responses[name] = true),
+                            icon: const Icon(Icons.check_circle_outline),
+                          ),
+                          IconButton(
+                            tooltip: '辞退',
+                            onPressed: () => setState(() => responses[name] = false),
+                            icon: const Icon(Icons.cancel_outlined),
+                          ),
+                        ],
+                      )
+                    : Icon(
+                        response ? Icons.check_circle : Icons.cancel,
+                        color: const Color(0xFF36594B),
+                      ),
+                ),
+              );
+            }),
+            if (allResponded && accepted.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text('承諾したBuddy：' + accepted.map((b) => b['name']!).join('、')),
+              Text('まとめて支払うBuddy料金（デモ）：' + total.toString() + '円',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              if (paid)
+                const Card(
+                  color: Color(0xFFE9EEE9),
+                  child: ListTile(
+                    leading: Icon(Icons.check_circle, color: Color(0xFF36594B)),
+                    title: Text('まとめ払いを確認しました（デモ）'),
+                    subtitle: Text('実際のカード決済は行われていません'),
+                  ),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => setState(() => paid = true),
+                    child: const Text('承諾したBuddy全員分をカード決済（デモ）'),
+                  ),
+                ),
+            ] else if (allResponded) ...[
+              const SizedBox(height: 12),
+              const Text('今回は承諾したBuddyがいません。'),
+            ],
+            const SizedBox(height: 10),
+            const Text('デモ操作です。実際のお誘い・返事・決済は保存されません。',
+              style: TextStyle(fontSize: 12, color: Color(0xFF6B706B))),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class InviteSheet extends StatefulWidget {
-  const InviteSheet({super.key, required this.buddyName});
-  final String buddyName;
+  const InviteSheet({super.key, required this.buddyNames});
+  final String buddyNames;
 
   @override
   State<InviteSheet> createState() => _InviteSheetState();
@@ -215,8 +383,11 @@ class _InviteSheetState extends State<InviteSheet> {
           children: [
             const Text('Buddyを誘う', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
-            Text(widget.buddyName + 'さんに予定を送ります'),
+            Text(widget.buddyNames + 'に予定を送ります'),
             const SizedBox(height: 16),
+            const Text('デモ画面です。実際のお誘い送信には登録・ログインが必要です。',
+              style: TextStyle(fontSize: 12, color: Color(0xFF6B706B))),
+            const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               value: category,
               decoration: const InputDecoration(labelText: 'カテゴリ'),
@@ -266,10 +437,8 @@ class _InviteSheetState extends State<InviteSheet> {
               child: FilledButton(
                 onPressed: timing == '日時指定' && scheduledAt == null
                   ? null
-                  : () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('お誘いの送信には登録・ログインが必要です')),
-                    ),
-                child: const Text('この内容で誘う'),
+                  : () => Navigator.of(context).pop(duration),
+                child: const Text('この内容で誘う（デモ）'),
               ),
             ),
           ],
