@@ -44,9 +44,12 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
     ));
   }
 
-  void requireSignIn() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Buddyへのお誘いには登録・ログインが必要です')),
+  void openInvite(Map<String, String> buddy) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (_) => InviteSheet(buddyName: buddy['name']!),
     );
   }
 
@@ -137,6 +140,117 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
           label: const Text('Buddyを決めずに「相方を募る」'),
         ),
       ],
+    ),
+  );
+}
+
+
+class InviteSheet extends StatefulWidget {
+  const InviteSheet({super.key, required this.buddyName});
+  final String buddyName;
+
+  @override
+  State<InviteSheet> createState() => _InviteSheetState();
+}
+
+class _InviteSheetState extends State<InviteSheet> {
+  String category = '遊';
+  String timing = '今すぐ・当日';
+  int duration = 60;
+  DateTime? scheduledAt;
+
+  Future<void> chooseDateTime() async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 90)),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(now),
+    );
+    if (time == null || !mounted) return;
+    setState(() => scheduledAt = DateTime(
+      date.year, date.month, date.day, time.hour, time.minute,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      22, 22, 22, MediaQuery.viewInsetsOf(context).bottom + 24,
+    ),
+    child: SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Buddyを誘う', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 6),
+            Text(widget.buddyName + 'さんに予定を送ります'),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: category,
+              decoration: const InputDecoration(labelText: 'カテゴリ'),
+              items: cats.skip(1).map((item) =>
+                DropdownMenuItem(value: item, child: Text(item))).toList(),
+              onChanged: (value) => setState(() => category = value ?? category),
+            ),
+            const SizedBox(height: 12),
+            const Text('希望タイミング', style: TextStyle(fontWeight: FontWeight.w700)),
+            RadioListTile<String>(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('今すぐ・当日'),
+              value: '今すぐ・当日',
+              groupValue: timing,
+              onChanged: (value) => setState(() => timing = value!),
+            ),
+            RadioListTile<String>(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('日時を決めて予約'),
+              value: '日時指定',
+              groupValue: timing,
+              onChanged: (value) => setState(() => timing = value!),
+            ),
+            if (timing == '日時指定')
+              OutlinedButton.icon(
+                onPressed: chooseDateTime,
+                icon: const Icon(Icons.calendar_month_outlined),
+                label: Text(scheduledAt == null
+                  ? '希望日時を選ぶ'
+                  : MaterialLocalizations.of(context).formatMediumDate(scheduledAt!) +
+                    ' ' + TimeOfDay.fromDateTime(scheduledAt!).format(context)),
+              ),
+            const SizedBox(height: 8),
+            const Text('予定時間', style: TextStyle(fontWeight: FontWeight.w700)),
+            Wrap(
+              spacing: 8,
+              children: [30, 60, 90, 120].map((minutes) =>
+                ChoiceChip(
+                  label: Text(minutes.toString() + '分'),
+                  selected: duration == minutes,
+                  onSelected: (_) => setState(() => duration = minutes),
+                )).toList(),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: timing == '日時指定' && scheduledAt == null
+                  ? null
+                  : () => ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('お誘いの送信には登録・ログインが必要です')),
+                    ),
+                child: const Text('この内容で誘う'),
+              ),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }
