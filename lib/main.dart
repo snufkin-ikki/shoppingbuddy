@@ -125,7 +125,7 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: requireSignIn,
+                    onPressed: () => openInvite(buddy),
                     child: const Text('このBuddyを誘う'),
                   ),
                 ),
