@@ -6,7 +6,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 
 - Public area-based companion requests
 - Visitors can browse public requests and public profile fields before signup
-- Verified Buddies can apply; the requester selects one Buddy before the deadline
+- Verified Buddies can apply; only the requester sees the applicant list and selects one Buddy before the deadline
 - Exact meeting details are separated and exposed only to matched participants
 - Direct invitations remain a separate flow
 - Initial areas: Shimokitazawa, Shibuya/Harajuku, Asakusa/Kuramae, Akihabara, Jimbocho, Kyoto, Osaka/Shinsaibashi, Nagoya/Sakae, Fukuoka/Tenjin, Sendai, and Sapporo
