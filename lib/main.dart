@@ -616,6 +616,156 @@ class DemoPaymentSheet extends StatelessWidget {
   }
 }
 
+class DemoMeetupSheet extends StatefulWidget {
+  const DemoMeetupSheet({super.key, required this.request, required this.buddy});
+  final Request request;
+  final DemoApplicant buddy;
+
+  @override
+  State<DemoMeetupSheet> createState() => _DemoMeetupSheetState();
+}
+
+class _DemoMeetupSheetState extends State<DemoMeetupSheet> {
+  bool requesterDone = false;
+  bool buddyDone = false;
+  bool ratingSent = false;
+  int rating = 0;
+  final selectedTags = <String>{};
+  static const tags = [
+    '話しやすい', '街に詳しい', '提案が上手', '気配りがある',
+    '時間を守る', 'また会いたい',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final bothDone = requesterDone && buddyDone;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        22, 22, 22, MediaQuery.viewInsetsOf(context).bottom + 24,
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('お出かけの完了確認',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6),
+              const Text('デモ画面 · 実際の予約・決済は行われていません'),
+              const SizedBox(height: 14),
+              Text(widget.request.area + ' · ' + widget.request.title),
+              Text(widget.buddy.name + 'さん · ' + widget.request.duration.toString() + '分'),
+              const SizedBox(height: 14),
+              Card(
+                color: const Color(0xFFF3F5F2),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(
+                        requesterDone ? Icons.check_circle : Icons.radio_button_unchecked,
+                        color: const Color(0xFF36594B),
+                      ),
+                      title: const Text('利用者の完了確認'),
+                      subtitle: Text(requesterDone ? '完了' : '確認待ち'),
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        buddyDone ? Icons.check_circle : Icons.radio_button_unchecked,
+                        color: const Color(0xFF36594B),
+                      ),
+                      title: const Text('Buddyの完了確認'),
+                      subtitle: Text(buddyDone ? '完了' : '確認待ち'),
+                    ),
+                  ],
+                ),
+              ),
+              if (!bothDone) ...[
+                const SizedBox(height: 10),
+                if (!requesterDone)
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.tonal(
+                      onPressed: () => setState(() => requesterDone = true),
+                      child: const Text('利用者側の完了を確認（デモ）'),
+                    ),
+                  ),
+                if (requesterDone && !buddyDone) ...[
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Buddy側の確認を待っています。デモでは下のボタンで相手側の確認も試せます。',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => setState(() => buddyDone = true),
+                      child: const Text('Buddy側も完了にする（デモ）'),
+                    ),
+                  ),
+                ],
+              ] else if (ratingSent) ...[
+                const SizedBox(height: 12),
+                const Card(
+                  color: Color(0xFFE9EEE9),
+                  child: ListTile(
+                    leading: Icon(Icons.check_circle, color: Color(0xFF36594B)),
+                    title: Text('評価を送信しました（デモ）'),
+                    subtitle: Text('実際の評価データは保存されていません'),
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(height: 12),
+                const Text('両者の完了を確認しました。Buddyを評価してください。',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [1, 2, 3, 4, 5].map((value) => ChoiceChip(
+                    label: Text('★' * value),
+                    selected: rating == value,
+                    onSelected: (_) => setState(() => rating = value),
+                  )).toList(),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: tags.map((tag) => FilterChip(
+                    label: Text(tag),
+                    selected: selectedTags.contains(tag),
+                    onSelected: (selected) => setState(() {
+                      if (selected) {
+                        selectedTags.add(tag);
+                      } else {
+                        selectedTags.remove(tag);
+                      }
+                    }),
+                  )).toList(),
+                ),
+                const SizedBox(height: 8),
+                const Text('完了後24時間はチャットを利用できます。',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF6B706B))),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: rating == 0
+                        ? null
+                        : () => setState(() => ratingSent = true),
+                    child: const Text('評価を送信（デモ）'),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class Board extends StatefulWidget {
   const Board({super.key});
   @override
@@ -647,8 +797,11 @@ class _BoardState extends State<Board> {
       builder: (_) => DemoPaymentSheet(request: request, buddy: buddy),
     );
     if (paid == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('デモ画面です。カード決済はStripe連携後に利用できます')),
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.white,
+        builder: (_) => DemoMeetupSheet(request: request, buddy: buddy),
       );
     }
   }
