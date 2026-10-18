@@ -26,7 +26,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 ## What is implemented
 
 - Flutter board screen with area and category filters
-- Buddy directory as the home screen, filtered by each Buddy's supported areas; matching opens when an area has 2 verified Buddies; public request board is a secondary flow
+- Buddy directory as the home screen, filtered by each Buddy's supported areas; matching opens when an area has 2 verified Buddies; public request board is a secondary flow; Buddy application form supports multiple areas and requires Instagram review (demo only)
 - Request creation and applications, requester-only applicant lists with one-Buddy selection, multi-Buddy direct invites that wait for all replies and aggregate accepted rates, pre-payment chat, card payment previews, bilateral completion confirmation, and ratings (currently in-memory demo data)
 - Supabase SQL migration for public requests, private applicant lists, private meeting details, one-Buddy selection, pre-payment chat, detail confirmation before payment, bilateral completion, 24-hour post-completion chat, and source/translation fields
 
