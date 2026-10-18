@@ -37,14 +37,19 @@ create table if not exists public.public_requests (
   duration_minutes smallint check (duration_minutes in (30, 60, 90, 120)),
   apply_deadline timestamptz not null,
   status text not null default 'open'
-    check (status in ('open', 'matched', 'cancelled', 'expired')),
+    check (status in ('open', 'matched', 'completed', 'cancelled', 'expired')),
   selected_buddy_id uuid references auth.users(id),
   payment_status text not null default 'not_due'
     check (payment_status in ('not_due', 'pending', 'paid', 'refunded')),
   details_confirmed_at timestamptz,
+  requester_completed_at timestamptz,
+  buddy_completed_at timestamptz,
   created_at timestamptz not null default now(),
   check (apply_deadline > created_at),
-  check ((status = 'matched') = (selected_buddy_id is not null))
+  check ((status in ('matched', 'completed')) = (selected_buddy_id is not null)),
+  check (status <> 'completed' or (
+    requester_completed_at is not null and buddy_completed_at is not null
+  ))
 );
 
 create index if not exists public_requests_open_area_deadline_idx
@@ -136,7 +141,7 @@ create policy "matched parties read meeting details"
     exists (
       select 1 from public.public_requests r
       where r.id = request_id
-        and r.status = 'matched'
+        and r.status in ('matched', 'completed')
         and (r.requester_id = auth.uid() or r.selected_buddy_id = auth.uid())
     )
   );
@@ -174,7 +179,13 @@ create policy "matched parties read request messages"
     exists (
       select 1 from public.public_requests r
       where r.id = request_id
-        and r.status = 'matched'
+        and (
+          r.status = 'matched'
+          or (
+            r.status = 'completed'
+            and now() <= greatest(r.requester_completed_at, r.buddy_completed_at) + interval '24 hours'
+          )
+        )
         and (r.requester_id = auth.uid() or r.selected_buddy_id = auth.uid())
     )
   );
@@ -278,3 +289,40 @@ $;
 
 revoke all on function public.confirm_public_request_details(uuid, timestamptz, smallint) from public;
 grant execute on function public.confirm_public_request_details(uuid, timestamptz, smallint) to authenticated;
+
+-- Both the requester and selected Buddy confirm completion before review.
+create or replace function public.confirm_public_request_completion(p_request_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  update public.public_requests
+  set requester_completed_at = case
+        when requester_id = auth.uid() then coalesce(requester_completed_at, now())
+        else requester_completed_at
+      end,
+      buddy_completed_at = case
+        when selected_buddy_id = auth.uid() then coalesce(buddy_completed_at, now())
+        else buddy_completed_at
+      end,
+      status = case
+        when (requester_completed_at is not null or requester_id = auth.uid())
+         and (buddy_completed_at is not null or selected_buddy_id = auth.uid())
+        then 'completed'
+        else status
+      end
+  where id = p_request_id
+    and status = 'matched'
+    and payment_status = 'paid'
+    and (requester_id = auth.uid() or selected_buddy_id = auth.uid());
+
+  if not found then
+    raise exception 'Only matched, paid participants can confirm completion';
+  end if;
+end;
+$;
+
+revoke all on function public.confirm_public_request_completion(uuid) from public;
+grant execute on function public.confirm_public_request_completion(uuid) to authenticated;
