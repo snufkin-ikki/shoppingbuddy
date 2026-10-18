@@ -17,7 +17,127 @@ class BuddyApp extends StatelessWidget {
     debugShowCheckedModeBanner: false,
     title: 'Shopping Buddy',
     theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF36594B), scaffoldBackgroundColor: const Color(0xFFF7F6F2)),
-    home: const Board(),
+    home: const BuddyDirectory(),
+  );
+}
+
+
+class BuddyDirectory extends StatefulWidget {
+  const BuddyDirectory({super.key});
+
+  @override
+  State<BuddyDirectory> createState() => _BuddyDirectoryState();
+}
+
+class _BuddyDirectoryState extends State<BuddyDirectory> {
+  String area = '下北沢';
+
+  final buddies = const [
+    {'name': 'Mana', 'tagline': '古着と小さなギャラリーが好き', 'tags': '衣・遊', 'rate': '1,000円 / 30分', 'initial': 'M'},
+    {'name': 'Kai', 'tagline': '街の喫茶店や雑貨屋を案内します', 'tags': '食・住', 'rate': '1,500円 / 30分', 'initial': 'K'},
+    {'name': 'Yuki', 'tagline': '初めての街歩きも気軽にどうぞ', 'tags': '美・遊', 'rate': '1,200円 / 30分', 'initial': 'Y'},
+  ];
+
+  void openPublicBoard() {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => const Board(),
+    ));
+  }
+
+  void requireSignIn() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Buddyへのお誘いには登録・ログインが必要です')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: const Text('shopping buddy', style: TextStyle(fontWeight: FontWeight.w800)),
+      actions: [
+        TextButton(
+          onPressed: requireSignIn,
+          child: const Text('ログイン'),
+        ),
+      ],
+    ),
+    body: ListView(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      children: [
+        const Text(
+          '街を知るBuddyと、\nいつもの買い物をもっと楽しく。',
+          style: TextStyle(fontSize: 27, height: 1.25, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 8),
+        const Text('プロフィールから相手を選んで、街歩きに誘えます。'),
+        const SizedBox(height: 22),
+        DropdownButtonFormField<String>(
+          value: area,
+          decoration: const InputDecoration(
+            labelText: 'エリア',
+            prefixIcon: Icon(Icons.place_outlined),
+            border: OutlineInputBorder(),
+          ),
+          items: areas.skip(1).map((item) =>
+            DropdownMenuItem(value: item, child: Text(item))).toList(),
+          onChanged: (value) => setState(() => area = value ?? area),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          area + 'のBuddy',
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 10),
+        ...buddies.map((buddy) => Card(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  CircleAvatar(
+                    backgroundColor: const Color(0xFFE9EEE9),
+                    child: Text(buddy['initial']!, style: const TextStyle(color: Color(0xFF36594B), fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Text(buddy['name']!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.verified, size: 16, color: Color(0xFF36594B)),
+                        const Text(' DEMO', style: TextStyle(fontSize: 10, color: Color(0xFF81837D))),
+                      ]),
+                      Text(buddy['tagline']!, style: const TextStyle(fontSize: 13)),
+                    ],
+                  )),
+                ]),
+                const SizedBox(height: 10),
+                Text('カテゴリ：' + buddy['tags']!),
+                const SizedBox(height: 4),
+                Text('料金：' + buddy['rate']!, style: const TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: requireSignIn,
+                    child: const Text('このBuddyを誘う'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )),
+        const SizedBox(height: 18),
+        OutlinedButton.icon(
+          onPressed: openPublicBoard,
+          icon: const Icon(Icons.campaign_outlined),
+          label: const Text('Buddyを決めずに「相方を募る」'),
+        ),
+      ],
+    ),
   );
 }
 
@@ -47,7 +167,8 @@ class _BoardState extends State<Board> {
   Widget build(BuildContext context) => Scaffold(
     floatingActionButton: FloatingActionButton.extended(onPressed: requireSignIn, icon: const Icon(Icons.add), label: const Text('相方を募る')),
     body: SafeArea(child: CustomScrollView(slivers: [
-      SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 18, 20, 10), child: Row(children: [
+      SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(12, 18, 20, 10), child: Row(children: [
+        IconButton(onPressed: () => Navigator.of(context).maybePop(), icon: const Icon(Icons.arrow_back)),
         const Icon(Icons.explore, color: Color(0xFF36594B)), const SizedBox(width: 8),
         const Text('shopping buddy', style: TextStyle(fontWeight: FontWeight.w800)),
         const Spacer(), TextButton(onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ログイン連携準備中'))), child: const Text('ログイン')),
