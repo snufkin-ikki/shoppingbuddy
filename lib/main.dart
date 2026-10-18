@@ -6,8 +6,10 @@ const areas = ['すべて','下北沢','渋谷・原宿','浅草・蔵前','秋�
 const cats = ['すべて','衣','美','食','住','遊','電'];
 
 class Request {
-  Request(this.title, this.area, this.category, this.when, this.about, this.name);
+  Request(this.title, this.area, this.category, this.when, this.about, this.name,
+      {this.duration = 60});
   final String title, area, category, when, about, name;
+  final int duration;
 }
 
 class BuddyApp extends StatelessWidget {
@@ -261,6 +263,193 @@ class _InviteSheetState extends State<InviteSheet> {
   );
 }
 
+class RequestComposer extends StatefulWidget {
+  const RequestComposer({super.key, required this.initialArea});
+  final String initialArea;
+
+  @override
+  State<RequestComposer> createState() => _RequestComposerState();
+}
+
+class _RequestComposerState extends State<RequestComposer> {
+  final formKey = GlobalKey<FormState>();
+  final titleController = TextEditingController();
+  final aboutController = TextEditingController();
+  late String area = widget.initialArea;
+  String category = '遊';
+  String timing = '今すぐ・当日';
+  int duration = 60;
+  DateTime? scheduledAt;
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    aboutController.dispose();
+    super.dispose();
+  }
+
+  Future<void> chooseDateTime() async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 90)),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(now),
+    );
+    if (time == null || !mounted) return;
+    setState(() => scheduledAt = DateTime(
+      date.year, date.month, date.day, time.hour, time.minute,
+    ));
+  }
+
+  String get whenLabel {
+    if (timing == '今すぐ・当日') return timing;
+    if (scheduledAt == null) return '日時を選択してください';
+    return MaterialLocalizations.of(context).formatMediumDate(scheduledAt!) +
+        ' ' + TimeOfDay.fromDateTime(scheduledAt!).format(context);
+  }
+
+  void submit() {
+    if (!(formKey.currentState?.validate() ?? false)) return;
+    if (timing == '日時指定' && scheduledAt == null) return;
+    Navigator.of(context).pop(Request(
+      titleController.text.trim(),
+      area,
+      category,
+      whenLabel,
+      aboutController.text.trim().isEmpty
+          ? '行きたい場所や希望を相談しながら決めたいです。'
+          : aboutController.text.trim(),
+      'あなた',
+      duration: duration,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      22, 22, 22, MediaQuery.viewInsetsOf(context).bottom + 24,
+    ),
+    child: SafeArea(
+      child: SingleChildScrollView(
+        child: Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('相方を募る', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6),
+              const Text('行きたい街や過ごし方を書いて、Buddyからの応募を待ちます。'),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                value: area,
+                decoration: const InputDecoration(labelText: 'エリア'),
+                items: areas.skip(1).map((item) =>
+                  DropdownMenuItem(value: item, child: Text(item))).toList(),
+                onChanged: (value) => setState(() => area = value ?? area),
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: category,
+                decoration: const InputDecoration(labelText: 'ジャンル'),
+                items: cats.skip(1).map((item) =>
+                  DropdownMenuItem(value: item, child: Text(item))).toList(),
+                onChanged: (value) => setState(() => category = value ?? category),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: titleController,
+                maxLength: 40,
+                decoration: const InputDecoration(
+                  labelText: '募集タイトル',
+                  hintText: '例：下北沢で古着屋を一緒に巡りたい',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'タイトルを入力してください'
+                    : null,
+              ),
+              TextFormField(
+                controller: aboutController,
+                maxLength: 240,
+                minLines: 2,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'やりたいこと・希望（任意）',
+                  hintText: '行きたい場所や探しているものを書いてください',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text('希望タイミング', style: TextStyle(fontWeight: FontWeight.w700)),
+              RadioListTile<String>(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('今すぐ・当日'),
+                value: '今すぐ・当日',
+                groupValue: timing,
+                onChanged: (value) => setState(() => timing = value!),
+              ),
+              RadioListTile<String>(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('日時を決めて予約'),
+                value: '日時指定',
+                groupValue: timing,
+                onChanged: (value) => setState(() => timing = value!),
+              ),
+              if (timing == '日時指定')
+                OutlinedButton.icon(
+                  onPressed: chooseDateTime,
+                  icon: const Icon(Icons.calendar_month_outlined),
+                  label: Text(scheduledAt == null ? '希望日時を選ぶ' : whenLabel),
+                ),
+              const SizedBox(height: 8),
+              const Text('予定時間', style: TextStyle(fontWeight: FontWeight.w700)),
+              Wrap(
+                spacing: 8,
+                children: [30, 60, 90, 120].map((minutes) =>
+                  ChoiceChip(
+                    label: Text(minutes.toString() + '分'),
+                    selected: duration == minutes,
+                    onSelected: (_) => setState(() => duration = minutes),
+                  )).toList(),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F5F2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'デモ画面です。投稿の公開とBuddyへの応募には、実サービスでは登録・ログインが必要です。',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: timing == '日時指定' && scheduledAt == null
+                      ? null
+                      : submit,
+                  child: const Text('募集内容を確認する'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 class Board extends StatefulWidget {
   const Board({super.key});
   @override
@@ -277,15 +466,31 @@ class _BoardState extends State<Board> {
   ];
   List<Request> get shown => requests.where((r) => (area == 'すべて' || r.area == area) && (category == 'すべて' || r.category == category)).toList();
 
-  void requireSignIn() {
+  Future<void> openComposer() async {
+    final request = await showModalBottomSheet<Request>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (_) => RequestComposer(
+        initialArea: area == 'すべて' ? areas[1] : area,
+      ),
+    );
+    if (request == null || !mounted) return;
+    setState(() {
+      requests.insert(0, request);
+      area = request.area;
+      category = 'すべて';
+    });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('募集の投稿には登録・ログインが必要です')),
+      const SnackBar(
+        content: Text('デモ投稿として一覧に追加しました。公開には登録・ログインが必要です'),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    floatingActionButton: FloatingActionButton.extended(onPressed: requireSignIn, icon: const Icon(Icons.add), label: const Text('相方を募る')),
+    floatingActionButton: FloatingActionButton.extended(onPressed: openComposer, icon: const Icon(Icons.add), label: const Text('相方を募る')),
     body: SafeArea(child: CustomScrollView(slivers: [
       SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(12, 18, 20, 10), child: Row(children: [
         IconButton(onPressed: () => Navigator.of(context).maybePop(), icon: const Icon(Icons.arrow_back)),
@@ -306,7 +511,7 @@ class _BoardState extends State<Board> {
         final r = shown[i];
         return Card(margin: const EdgeInsets.only(bottom: 12), color: Colors.white, child: ListTile(
           contentPadding: const EdgeInsets.all(16), title: Text(r.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Padding(padding: const EdgeInsets.only(top: 8), child: Text(r.area + ' · ' + r.when + '\n' + r.about + '\n' + r.name + ' · 募集受付中')),
+          subtitle: Padding(padding: const EdgeInsets.only(top: 8), child: Text(r.area + ' · ' + r.when + ' · ' + r.duration.toString() + '分\n' + r.about + '\n' + r.name + ' · 募集受付中')),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (ctx) => Padding(padding: const EdgeInsets.all(24), child: SafeArea(child: Wrap(runSpacing: 12, children: [
             Text(r.area + ' · ' + r.category, style: const TextStyle(color: Color(0xFF36594B), fontWeight: FontWeight.bold)),
@@ -314,6 +519,7 @@ class _BoardState extends State<Board> {
             Text('募集者 ' + r.name + '　プロフィールを見る'),
             Text(r.about),
             Text('希望日時：' + r.when),
+            Text('予定時間：' + r.duration.toString() + '分'),
             const Text('待ち合わせ場所はマッチング後に公開'),
             const Text('募集者が期限内にBuddyを1人選びます'),
             SizedBox(width: double.infinity, child: FilledButton(onPressed: () => ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('応募には登録とBuddy本人確認が必要です'))), child: const Text('この募集に応募する'))),
