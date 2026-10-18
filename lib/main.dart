@@ -37,39 +37,15 @@ class _BoardState extends State<Board> {
   ];
   List<Request> get shown => requests.where((r) => (area == 'すべて' || r.area == area) && (category == 'すべて' || r.category == category)).toList();
 
-  void createRequest() {
-    final title = TextEditingController();
-    final about = TextEditingController();
-    String newArea = areas[1], newCategory = '遊';
-    showModalBottomSheet<void>(
-      context: context, isScrollControlled: true, backgroundColor: Colors.white,
-      builder: (sheetContext) => StatefulBuilder(builder: (context, refresh) => Padding(
-        padding: EdgeInsets.fromLTRB(22, 24, 22, MediaQuery.viewInsetsOf(context).bottom + 24),
-        child: SingleChildScrollView(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('相方を募る', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          TextField(controller: title, decoration: const InputDecoration(labelText: '募集タイトル', hintText: '例：古着屋を一緒に巡りたい')),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(value: newArea, decoration: const InputDecoration(labelText: 'エリア'), items: areas.skip(1).map((x) => DropdownMenuItem(value: x, child: Text(x))).toList(), onChanged: (x) => refresh(() => newArea = x ?? newArea)),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(value: newCategory, decoration: const InputDecoration(labelText: 'カテゴリ'), items: cats.skip(1).map((x) => DropdownMenuItem(value: x, child: Text(x))).toList(), onChanged: (x) => refresh(() => newCategory = x ?? newCategory)),
-          const SizedBox(height: 10),
-          TextField(controller: about, minLines: 3, maxLines: 5, decoration: const InputDecoration(labelText: 'やりたいこと')),
-          const SizedBox(height: 18),
-          SizedBox(width: double.infinity, child: FilledButton(onPressed: () {
-            if (title.text.trim().isEmpty) return;
-            setState(() => requests.insert(0, Request(title.text.trim(), newArea, newCategory, '日時を相談', about.text.trim().isEmpty ? '詳細はBuddyと相談して決めます。' : about.text.trim(), 'あなた')));
-            Navigator.pop(sheetContext);
-            ScaffoldMessenger.of(this.context).showSnackBar(const SnackBar(content: Text('募集を公開しました（デモ表示）')));
-          }, child: const Text('募集を公開する'))),
-        ])),
-      )),
-    ).whenComplete(() { title.dispose(); about.dispose(); });
+  void requireSignIn() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('募集の投稿には登録・ログインが必要です')),
+    );
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    floatingActionButton: FloatingActionButton.extended(onPressed: createRequest, icon: const Icon(Icons.add), label: const Text('相方を募る')),
+    floatingActionButton: FloatingActionButton.extended(onPressed: requireSignIn, icon: const Icon(Icons.add), label: const Text('相方を募る')),
     body: SafeArea(child: CustomScrollView(slivers: [
       SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 18, 20, 10), child: Row(children: [
         const Icon(Icons.explore, color: Color(0xFF36594B)), const SizedBox(width: 8),
