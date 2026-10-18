@@ -35,8 +35,8 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Give each approved Buddy a unique tracked profile/referral link and a ready-to-share social post
 - Attribute new Buddy applications to the referring profile
 - Keep an admin contribution ledger for applications, approved profiles, first completed paid matches, contribution scores, redeemable service points, and rankings
-- For a directly referred Buddy, award 100 service points to the direct referrer when the profile passes review, then an additional 400 points when the Buddy completes their first paid match (500 points total)
-- For a second-generation referral ("grandchild Buddy"), award 50 service points once to the original referrer when the grandchild Buddy's profile passes review; no extra second-generation match-completion bonus is included at launch
+- For a directly referred Buddy, award 100 service points and 100 contribution points to the direct referrer when the profile passes review, then an additional 400 service points and 400 contribution points when the Buddy completes their first paid match (500 points total for each balance)
+- For a second-generation referral ("grandchild Buddy"), award 50 service points and 50 contribution points once to the original referrer when the grandchild Buddy's profile passes review; no extra second-generation match-completion bonus is included at launch
 - Award contribution scores and service points for quality milestones rather than raw applications
 - Track contribution scores separately from redeemable service points, so using points does not lower a person's ranking
 - Redeemable service points are for the user's side of a future Buddy booking; they cannot be cashed out or transferred
