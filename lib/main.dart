@@ -5,11 +5,23 @@ void main() => runApp(const BuddyApp());
 const areas = ['すべて','下北沢','渋谷・原宿','浅草・蔵前','秋葉原','神保町','京都','大阪・心斎橋','名古屋・栄','福岡・天神','仙台','札幌'];
 const cats = ['すべて','衣','美','食','住','遊','電'];
 
+class DemoApplicant {
+  const DemoApplicant(this.name, this.tagline, this.tags, this.rate);
+  final String name, tagline, tags, rate;
+}
+
+const demoApplicants = [
+  DemoApplicant('Mana', '古着と小さなギャラリーが好き', '衣・遊', '1,000円 / 30分'),
+  DemoApplicant('Kai', '街の喫茶店や雑貨屋を案内します', '食・住', '1,500円 / 30分'),
+];
+
 class Request {
   Request(this.title, this.area, this.category, this.when, this.about, this.name,
-      {this.duration = 60});
+      {this.duration = 60, this.isMine = false});
   final String title, area, category, when, about, name;
   final int duration;
+  final bool isMine;
+  String? selectedBuddy;
 }
 
 class BuddyApp extends StatelessWidget {
@@ -327,6 +339,7 @@ class _RequestComposerState extends State<RequestComposer> {
           : aboutController.text.trim(),
       'あなた',
       duration: duration,
+      isMine: true,
     ));
   }
 
@@ -513,17 +526,86 @@ class _BoardState extends State<Board> {
           contentPadding: const EdgeInsets.all(16), title: Text(r.title, style: const TextStyle(fontWeight: FontWeight.bold)),
           subtitle: Padding(padding: const EdgeInsets.only(top: 8), child: Text(r.area + ' · ' + r.when + ' · ' + r.duration.toString() + '分\n' + r.about + '\n' + r.name + ' · 募集受付中')),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (ctx) => Padding(padding: const EdgeInsets.all(24), child: SafeArea(child: Wrap(runSpacing: 12, children: [
-            Text(r.area + ' · ' + r.category, style: const TextStyle(color: Color(0xFF36594B), fontWeight: FontWeight.bold)),
-            Text(r.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Text('募集者 ' + r.name + '　プロフィールを見る'),
-            Text(r.about),
-            Text('希望日時：' + r.when),
-            Text('予定時間：' + r.duration.toString() + '分'),
-            const Text('待ち合わせ場所はマッチング後に公開'),
-            const Text('募集者が期限内にBuddyを1人選びます'),
-            SizedBox(width: double.infinity, child: FilledButton(onPressed: () => ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('応募には登録とBuddy本人確認が必要です'))), child: const Text('この募集に応募する'))),
-          ])))),
+          onTap: () => showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.white,
+            builder: (ctx) => Padding(
+              padding: EdgeInsets.fromLTRB(
+                24, 24, 24, MediaQuery.viewInsetsOf(ctx).bottom + 24,
+              ),
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(r.area + ' · ' + r.category,
+                        style: const TextStyle(color: Color(0xFF36594B), fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Text(r.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Text('募集者 ' + r.name),
+                      const SizedBox(height: 8),
+                      Text(r.about),
+                      const SizedBox(height: 8),
+                      Text('希望日時：' + r.when),
+                      Text('予定時間：' + r.duration.toString() + '分'),
+                      const SizedBox(height: 8),
+                      const Text('待ち合わせ場所はマッチング後に公開'),
+                      const SizedBox(height: 12),
+                      if (r.isMine) ...[
+                        const Text('応募者（募集者だけが見られます）',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 8),
+                        if (r.selectedBuddy != null)
+                          Card(
+                            color: const Color(0xFFE9EEE9),
+                            child: ListTile(
+                              leading: const Icon(Icons.check_circle, color: Color(0xFF36594B)),
+                              title: Text(r.selectedBuddy! + 'さんを選択しました'),
+                              subtitle: const Text('次はチャットで内容を相談します'),
+                            ),
+                          )
+                        else ...demoApplicants.map((applicant) => Card(
+                          color: Colors.white,
+                          child: ListTile(
+                            leading: const CircleAvatar(child: Text('DEMO')),
+                            title: Text(applicant.name + ' · DEMO',
+                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text(applicant.tagline + '\\n' +
+                              applicant.tags + ' · ' + applicant.rate),
+                            trailing: FilledButton.tonal(
+                              onPressed: () {
+                                setState(() => r.selectedBuddy = applicant.name);
+                                Navigator.of(ctx).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(applicant.name + 'さんを選びました')),
+                                );
+                              },
+                              child: const Text('この人を選ぶ'),
+                            ),
+                          ),
+                        )),
+                        const SizedBox(height: 8),
+                        const Text('デモ用の応募者です。実際の応募情報はまだ保存されません。',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF6B706B))),
+                      ] else
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: () => ScaffoldMessenger.of(ctx).showSnackBar(
+                              const SnackBar(content: Text('応募には登録とBuddy本人確認が必要です')),
+                            ),
+                            child: const Text('この募集に応募する'),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ));
       }, childCount: shown.length))),
     ])),
