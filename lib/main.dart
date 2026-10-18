@@ -44,6 +44,12 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
     ));
   }
 
+  void requireSignIn() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ログイン連携準備中')),
+    );
+  }
+
   void openInvite(Map<String, String> buddy) {
     showModalBottomSheet<void>(
       context: context,
