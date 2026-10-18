@@ -46,7 +46,8 @@ create table if not exists public.public_requests (
   buddy_completed_at timestamptz,
   created_at timestamptz not null default now(),
   check (apply_deadline > created_at),
-  check ((status in ('matched', 'completed')) = (selected_buddy_id is not null)),
+  check (status not in ('matched', 'completed') or selected_buddy_id is not null),
+  check (status <> 'open' or selected_buddy_id is null),
   check (status <> 'completed' or (
     requester_completed_at is not null and buddy_completed_at is not null
   ))
@@ -196,7 +197,13 @@ create policy "matched parties send request messages"
     and exists (
       select 1 from public.public_requests r
       where r.id = request_id
-        and r.status = 'matched'
+        and (
+          r.status = 'matched'
+          or (
+            r.status = 'completed'
+            and now() <= greatest(r.requester_completed_at, r.buddy_completed_at) + interval '24 hours'
+          )
+        )
         and (r.requester_id = auth.uid() or r.selected_buddy_id = auth.uid())
     )
   );
