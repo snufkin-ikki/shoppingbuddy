@@ -22,6 +22,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Buddy profiles can cover multiple areas
 - Enable matching independently in each city once at least 2 verified Buddy profiles are registered there; Buddy applications remain open nationwide
 - Open beta without invitation-only access; regular Buddy rates apply during beta when live payments are enabled
+- Launch iOS and Android together
 - After Buddy verification, present a prewritten social share message and a unique tracked public-profile link; users choose whether to share through the system share sheet
 - Primary MVP success metric: number of matches formed
 - Initial target: 10 matches in the first month
@@ -31,10 +32,14 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Every Buddy whose profile passes review can participate in the referral program
 - Give each approved Buddy a unique tracked profile/referral link and a ready-to-share social post
 - Attribute new Buddy applications to the referring profile
-- Keep an admin contribution ledger for applications, approved profiles, first completed paid matches, points, and monthly/all-time rankings
+- Keep an admin contribution ledger for applications, approved profiles, first completed paid matches, points, and rankings
 - Award points for quality milestones rather than raw applications: approval is the first qualifying milestone, with an additional milestone when the referred Buddy completes a first paid match
+- Show nationwide monthly and all-time rankings to all app users
+- When gift-card rewards launch later, start by rewarding the top 3 of the monthly ranking with Starbucks or Amazon gift cards
 - Affiliate cash rewards and exact point values are not set yet
-- Start with points and rankings; plan to add Starbucks or Amazon gift-card rewards later
+- Start with points and rankings; plan to add gift-card rewards later
+- Record referrals as a multi-generation network tree (referrer → referred Buddy → their referrals)
+- Each Buddy can view their own referral branch, while admins can view the full network to help trace connections and contact the right people if an issue occurs; do not expose private contact details in the tree
 - When a post includes a reward or other material benefit, include a clear advertising/PR disclosure in the suggested copy
 
 ## What is implemented
