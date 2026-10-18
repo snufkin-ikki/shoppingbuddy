@@ -97,6 +97,14 @@ create policy "users create own public requests"
     and apply_deadline > now()
   );
 
+create policy "requester stores private meeting details"
+  on public.request_private_details for insert to authenticated
+  with check (
+    exists (
+      select 1 from public.public_requests r
+      where r.id = request_id and r.requester_id = auth.uid() and r.status = 'open'
+    )
+  );
 create policy "matched parties read meeting details"
   on public.request_private_details for select to authenticated
   using (
@@ -134,6 +142,16 @@ create policy "verified buddies apply to open requests"
         and r.requester_id <> auth.uid()
     )
   );
+
+-- Explicit table grants keep the client surface limited to the intended operations.
+grant select on public.public_profiles to anon, authenticated;
+grant insert, update on public.public_profiles to authenticated;
+grant select on public.public_requests to anon, authenticated;
+grant insert on public.public_requests to authenticated;
+grant select on public.request_private_details to authenticated;
+grant insert on public.request_private_details to authenticated;
+grant select, insert on public.request_applications to authenticated;
+grant select on public.buddy_verifications to authenticated;
 
 -- One atomic choice: the requester selects exactly one applicant.
 create or replace function public.select_request_buddy(
