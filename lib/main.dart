@@ -52,10 +52,16 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
   final Set<String> selectedBuddyNames = {};
 
   final buddies = const [
-    {'name': 'Mana', 'tagline': '古着と小さなギャラリーが好き', 'tags': '衣・遊', 'rate': '1,000円 / 30分', 'initial': 'M'},
-    {'name': 'Kai', 'tagline': '街の喫茶店や雑貨屋を案内します', 'tags': '食・住', 'rate': '1,500円 / 30分', 'initial': 'K'},
-    {'name': 'Yuki', 'tagline': '初めての街歩きも気軽にどうぞ', 'tags': '美・遊', 'rate': '1,200円 / 30分', 'initial': 'Y'},
+    {'name': 'Mana', 'tagline': '古着と小さなギャラリーが好き', 'tags': '衣・遊', 'rate': '1,000円 / 30分', 'initial': 'M', 'areas': '下北沢,渋谷・原宿'},
+    {'name': 'Kai', 'tagline': '街の喫茶店や雑貨屋を案内します', 'tags': '食・住', 'rate': '1,500円 / 30分', 'initial': 'K', 'areas': '下北沢,浅草・蔵前,秋葉原'},
+    {'name': 'Yuki', 'tagline': '初めての街歩きも気軽にどうぞ', 'tags': '美・遊', 'rate': '1,200円 / 30分', 'initial': 'Y', 'areas': '神保町,京都'},
   ];
+
+  List<Map<String, String>> get visibleBuddies => buddies.where(
+    (buddy) => buddy['areas']!.split(',').contains(area),
+  ).toList();
+
+  bool get areaReady => visibleBuddies.length >= 2;
 
   void openPublicBoard() {
     Navigator.of(context).push(MaterialPageRoute<void>(
@@ -121,15 +127,49 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
           ),
           items: areas.skip(1).map((item) =>
             DropdownMenuItem(value: item, child: Text(item))).toList(),
-          onChanged: (value) => setState(() => area = value ?? area),
+          onChanged: (value) => setState(() {
+            area = value ?? area;
+            selectedBuddyNames.clear();
+          }),
         ),
         const SizedBox(height: 20),
         Text(
-          area + 'のBuddy',
+          area + 'のBuddy（' + visibleBuddies.length.toString() + '人）',
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
-        ...buddies.map((buddy) => Card(
+        if (visibleBuddies.isNotEmpty && !areaReady)
+          Card(
+            color: const Color(0xFFF3F5F2),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Text(
+                'このエリアはBuddy先行登録中です。認証済みBuddyが2人集まるとマッチングを開始します。',
+                style: const TextStyle(color: Color(0xFF36594B)),
+              ),
+            ),
+          ),
+        if (visibleBuddies.isEmpty)
+          Card(
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('このエリアはBuddy先行登録中です',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  const Text('認証済みBuddyが2人集まるとマッチングを開始します。'),
+                  TextButton(
+                    onPressed: requireSignIn,
+                    child: const Text('利用開始のお知らせを受け取る'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ...visibleBuddies.map((buddy) => Card(
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(14),
@@ -156,17 +196,20 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
                   )),
                   Checkbox(
                     value: selectedBuddyNames.contains(buddy['name']),
-                    onChanged: (selected) => setState(() {
+                    onChanged: areaReady ? (selected) => setState(() {
                       final name = buddy['name']!;
                       if (selected == true) {
                         selectedBuddyNames.add(name);
                       } else {
                         selectedBuddyNames.remove(name);
                       }
-                    }),
+                    }) : null,
                   ),
                 ]),
                 const SizedBox(height: 10),
+                Text('対応エリア：' + buddy['areas']!.replaceAll(',', '・'),
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF6B706B))),
+                const SizedBox(height: 4),
                 Text('カテゴリ：' + buddy['tags']!),
                 const SizedBox(height: 4),
                 Text('料金：' + buddy['rate']!, style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -174,7 +217,7 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: () => openInvite([buddy]),
+                    onPressed: areaReady ? () => openInvite([buddy]) : null,
                     child: const Text('このBuddyを誘う'),
                   ),
                 ),
@@ -182,7 +225,7 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
             ),
           ),
         )),
-        if (selectedBuddyNames.isNotEmpty) ...[
+        if (areaReady && selectedBuddyNames.isNotEmpty) ...[
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
