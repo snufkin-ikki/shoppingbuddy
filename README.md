@@ -24,6 +24,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Open beta without invitation-only access; regular Buddy rates apply during beta when live payments are enabled
 - Launch iOS and Android together
 - Launch with the Buddy referral program: tracked referral links, points redeemable toward the user's Buddy booking, and public nationwide monthly/all-time rankings
+- Each redeemable service point is worth JPY 1 at booking
 - After Buddy verification, present a prewritten social share message and a unique tracked public-profile link; users choose whether to share through the system share sheet
 - Primary MVP success metric: number of matches formed
 - Initial target: 10 matches in the first month
@@ -38,7 +39,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Track contribution scores separately from redeemable service points, so using points does not lower a person's ranking
 - Redeemable service points are for the user's side of a future Buddy booking; they cannot be cashed out or transferred
 - Keep the Buddy's agreed compensation intact when a customer uses points; the platform funds the point discount
-- Exact point values and redemption conversion are not set yet
+- The redemption conversion is fixed at 1 point = JPY 1; the number of points awarded for each milestone is not set yet
 - Show nationwide monthly and all-time rankings to all app users
 - When gift-card rewards launch later, start by rewarding the top 3 of the monthly ranking with Starbucks or Amazon gift cards
 - Start with contribution scores, redeemable service points, and rankings; plan to add gift-card rewards later
