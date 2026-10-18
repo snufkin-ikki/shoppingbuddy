@@ -10,6 +10,7 @@ create table if not exists public.public_profiles (
   age smallint check (age between 18 and 120),
   avatar_url text,
   bio text not null default '' check (char_length(bio) <= 500),
+  rate_per_30m_yen integer check (rate_per_30m_yen is null or rate_per_30m_yen >= 500),
   updated_at timestamptz not null default now()
 );
 
