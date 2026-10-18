@@ -72,7 +72,7 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
     );
     if (submitted != true || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Buddy登録申請をデモ送信しました。審査後に掲載されます')),
+      const SnackBar(content: Text('全国からのBuddy登録申請をデモ送信しました。審査後に掲載されます')),
     );
   }
 
@@ -411,6 +411,7 @@ class _BuddyApplicationSheetState extends State<BuddyApplicationSheet> {
   final nameController = TextEditingController();
   final introController = TextEditingController();
   final instagramController = TextEditingController();
+  final otherAreasController = TextEditingController();
   final areasSelected = <String>{};
   final categoriesSelected = <String>{'遊'};
   String? selectionError;
@@ -420,15 +421,18 @@ class _BuddyApplicationSheetState extends State<BuddyApplicationSheet> {
     nameController.dispose();
     introController.dispose();
     instagramController.dispose();
+    otherAreasController.dispose();
     super.dispose();
   }
 
   void submit() {
     final validFields = formKey.currentState?.validate() ?? false;
     setState(() {
-      selectionError = areasSelected.isEmpty || categoriesSelected.isEmpty
-          ? 'エリアとジャンルをそれぞれ1つ以上選んでください'
-          : null;
+      selectionError =
+          (areasSelected.isEmpty && otherAreasController.text.trim().isEmpty) ||
+                  categoriesSelected.isEmpty
+              ? '活動エリア（既定エリアまたは市区町村）とジャンルを入力してください'
+              : null;
     });
     if (!validFields || selectionError != null) return;
     Navigator.of(context).pop(true);
@@ -492,6 +496,17 @@ class _BuddyApplicationSheetState extends State<BuddyApplicationSheet> {
                     selectionError = null;
                   }),
                 )).toList(),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: otherAreasController,
+                maxLength: 80,
+                decoration: const InputDecoration(
+                  labelText: 'その他の市区町村（全国から応募できます）',
+                  hintText: '例：横浜市、那覇市',
+                  helperText: '複数の街は「、」で区切って入力',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 8),
               const Text('ジャンル',
