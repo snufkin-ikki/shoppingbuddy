@@ -14,6 +14,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Priority recruiting areas: Shimokitazawa, Shibuya/Harajuku, Asakusa/Kuramae, Akihabara, Jimbocho, Kyoto, Osaka/Shinsaibashi, Nagoya/Sakae, Fukuoka/Tenjin, Sendai, and Sapporo
 - Buddy applications are accepted from any city in Japan, including cities outside the priority list
 - Japanese and inbound visitors; planned ja/en/zh-Hans/zh-Hant/ko translations for requests, applications, and chat; immediate, same-day, and scheduled plans
+- Approved Buddy profiles show verified supported languages, including English and Chinese, and visitors can filter/search by language
 - Card payments first; Bitcoin is out of initial scope
 - Buddy fees are set in JPY; show an approximate conversion in the visitor’s currency
 
@@ -23,10 +24,12 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Enable matching independently in each city once at least 2 verified Buddy profiles are registered there; Buddy applications remain open nationwide
 - Open beta without invitation-only access; regular Buddy rates apply during beta when live payments are enabled
 - Launch iOS and Android together
+- Treat inbound use as a strategic launch priority alongside Japanese users
 - Launch with the Buddy referral program: tracked referral links, points redeemable toward the user's Buddy booking, and public nationwide monthly/all-time rankings
 - Each redeemable service point is worth JPY 1 at booking
 - After Buddy verification, present a prewritten social share message and a unique tracked public-profile link; users choose whether to share through the system share sheet
 - Public request pages have shareable URLs that can be sent through social media or messaging; keep exact meeting details and applicant lists private
+- Track inbound-specific indicators: approved English/Chinese-capable Buddy supply by city, inbound bookings and completed matches, and matching/completion rates by city and language
 - Primary MVP success metric: number of matches formed
 - Initial target: 10 matches in the first month
 
@@ -79,3 +82,8 @@ Create/configure Supabase, Stripe Connect, and Firebase projects, then connect c
 - Supabase Auth and Postgres (planned)
 - Stripe Connect (planned)
 - Firebase Cloud Messaging (planned)
+
+## Policy context
+
+The Japan Tourism Agency's 2026–2030 Tourism Nation Promotion Basic Plan keeps the national goals of 60 million inbound visitors and JPY 15 trillion in inbound tourism spending by 2030, while emphasizing regional visits and sustainable tourism.
+See the [Japan Tourism Agency plan summary](https://www.mlit.go.jp/kankocho/seisaku_seido/kihonkeikaku.html).
