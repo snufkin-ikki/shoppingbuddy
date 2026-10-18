@@ -25,6 +25,9 @@ create table if not exists public.public_requests (
   requester_id uuid not null references auth.users(id) on delete cascade,
   title text not null check (char_length(title) between 1 and 80),
   description text not null default '' check (char_length(description) <= 2000),
+  source_language text not null default 'ja'
+    check (source_language in ('ja', 'en', 'zh-Hans', 'zh-Hant', 'ko')),
+  translations jsonb not null default '{}'::jsonb,
   area text not null check (area in (
     '下北沢', '渋谷・原宿', '浅草・蔵前', '秋葉原', '神保町',
     '京都', '大阪・心斎橋', '名古屋・栄', '福岡・天神', '仙台', '札幌'
@@ -59,6 +62,9 @@ create table if not exists public.request_applications (
   request_id uuid not null references public.public_requests(id) on delete cascade,
   buddy_id uuid not null references auth.users(id) on delete cascade,
   message text not null default '' check (char_length(message) <= 500),
+  source_language text not null default 'ja'
+    check (source_language in ('ja', 'en', 'zh-Hans', 'zh-Hant', 'ko')),
+  translations jsonb not null default '{}'::jsonb,
   status text not null default 'pending'
     check (status in ('pending', 'selected', 'not_selected')),
   created_at timestamptz not null default now(),
@@ -73,6 +79,9 @@ create table if not exists public.request_messages (
   request_id uuid not null references public.public_requests(id) on delete cascade,
   sender_id uuid not null references auth.users(id) on delete cascade,
   body text not null check (char_length(body) between 1 and 2000),
+  source_language text not null default 'ja'
+    check (source_language in ('ja', 'en', 'zh-Hans', 'zh-Hant', 'ko')),
+  translations jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
 
