@@ -28,11 +28,13 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 
 ## Buddy growth and contribution tracking (planned)
 
+- Every Buddy whose profile passes review can participate in the referral program
 - Give each approved Buddy a unique tracked profile/referral link and a ready-to-share social post
 - Attribute new Buddy applications to the referring profile
 - Keep an admin contribution ledger for applications, approved profiles, first completed paid matches, points, and monthly/all-time rankings
 - Award points for quality milestones rather than raw applications: approval is the first qualifying milestone, with an additional milestone when the referred Buddy completes a first paid match
 - Affiliate cash rewards and exact point values are not set yet
+- Start with points and rankings; plan to add Starbucks or Amazon gift-card rewards later
 - When a post includes a reward or other material benefit, include a clear advertising/PR disclosure in the suggested copy
 
 ## What is implemented
