@@ -22,6 +22,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Buddy profiles can cover multiple areas
 - Enable matching independently in each city once at least 2 verified Buddy profiles are registered there; Buddy applications remain open nationwide
 - Open beta without invitation-only access; regular Buddy rates apply during beta when live payments are enabled
+- After Buddy verification, present a prewritten social share message and a unique tracked public-profile link; users choose whether to share through the system share sheet
 - Primary MVP success metric: number of matches formed
 - Initial target: 10 matches in the first month
 
