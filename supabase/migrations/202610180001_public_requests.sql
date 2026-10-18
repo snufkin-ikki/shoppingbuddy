@@ -35,6 +35,9 @@ create table if not exists public.public_requests (
   status text not null default 'open'
     check (status in ('open', 'matched', 'cancelled', 'expired')),
   selected_buddy_id uuid references auth.users(id),
+  payment_status text not null default 'not_due'
+    check (payment_status in ('not_due', 'pending', 'paid', 'refunded')),
+  details_confirmed_at timestamptz,
   created_at timestamptz not null default now(),
   check (apply_deadline > created_at),
   check ((status = 'matched') = (selected_buddy_id is not null))
@@ -216,7 +219,9 @@ begin
   end if;
 
   update public.public_requests
-  set status = 'matched', selected_buddy_id = v_buddy_id
+  set status = 'matched',
+      selected_buddy_id = v_buddy_id,
+      payment_status = 'pending'
   where id = p_request_id and requester_id = auth.uid() and status = 'open';
 
   if not found then
@@ -231,3 +236,35 @@ $$;
 
 revoke all on function public.select_request_buddy(uuid, uuid) from public;
 grant execute on function public.select_request_buddy(uuid, uuid) to authenticated;
+
+-- The requester confirms the agreed schedule after chat; the server may then
+-- create the Stripe checkout session. Stripe webhook code should mark payment
+-- as paid; the mobile client receives no direct payment-status write access.
+create or replace function public.confirm_public_request_details(
+  p_request_id uuid,
+  p_scheduled_at timestamptz,
+  p_duration_minutes smallint
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  update public.public_requests
+  set scheduled_at = p_scheduled_at,
+      duration_minutes = p_duration_minutes,
+      details_confirmed_at = now()
+  where id = p_request_id
+    and requester_id = auth.uid()
+    and status = 'matched'
+    and payment_status = 'pending';
+
+  if not found then
+    raise exception 'Request details cannot be confirmed';
+  end if;
+end;
+$;
+
+revoke all on function public.confirm_public_request_details(uuid, timestamptz, smallint) from public;
+grant execute on function public.confirm_public_request_details(uuid, timestamptz, smallint) to authenticated;
