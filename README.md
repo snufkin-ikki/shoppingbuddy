@@ -15,6 +15,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Buddy applications are accepted from any city in Japan, including cities outside the priority list
 - Japanese and inbound visitors; planned ja/en/zh-Hans/zh-Hant/ko translations for requests, applications, and chat; immediate, same-day, and scheduled plans
 - Approved Buddy profiles show verified supported languages, including English and Chinese, and visitors can filter/search by language
+- Discovery search gives multilingual profiles a ranking boost over Japanese-only profiles, while respecting selected area, availability, and user filters
 - Card payments first; Bitcoin is out of initial scope
 - Buddy fees are set in JPY; show an approximate conversion in the visitor’s currency
 
@@ -29,7 +30,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Each redeemable service point is worth JPY 1 at booking
 - After Buddy verification, present a prewritten social share message and a unique tracked public-profile link; users choose whether to share through the system share sheet
 - Public request pages have shareable URLs that can be sent through social media or messaging; keep exact meeting details and applicant lists private
-- Track inbound-specific indicators: approved English/Chinese-capable Buddy supply by city, inbound bookings and completed matches, and matching/completion rates by city and language
+- Track inbound-specific indicators: approved multilingual Buddy supply by city, inbound bookings and completed matches, and matching/completion rates by city and language
 - Primary MVP success metric: number of matches formed
 - Initial target: 10 matches in the first month
 
