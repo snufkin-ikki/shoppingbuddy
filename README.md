@@ -23,13 +23,14 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Enable matching independently in each city once at least 2 verified Buddy profiles are registered there; Buddy applications remain open nationwide
 - Open beta without invitation-only access; regular Buddy rates apply during beta when live payments are enabled
 - Launch iOS and Android together
+- Launch with the Buddy referral program: tracked referral links, points redeemable toward the user's Buddy booking, and public nationwide monthly/all-time rankings
 - After Buddy verification, present a prewritten social share message and a unique tracked public-profile link; users choose whether to share through the system share sheet
 - Primary MVP success metric: number of matches formed
 - Initial target: 10 matches in the first month
 
-## Buddy growth and contribution tracking (planned)
+## Buddy growth and contribution tracking
 
-- Every Buddy whose profile passes review can participate in the referral program
+- Every Buddy whose profile passes review can participate in the referral program from launch
 - Give each approved Buddy a unique tracked profile/referral link and a ready-to-share social post
 - Attribute new Buddy applications to the referring profile
 - Keep an admin contribution ledger for applications, approved profiles, first completed paid matches, contribution scores, redeemable service points, and rankings
@@ -40,9 +41,9 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Exact point values and redemption conversion are not set yet
 - Show nationwide monthly and all-time rankings to all app users
 - When gift-card rewards launch later, start by rewarding the top 3 of the monthly ranking with Starbucks or Amazon gift cards
-- Start with contribution scores and service points; plan to add gift-card rewards later
-- Record referrals as a multi-generation network tree (referrer → referred Buddy → their referrals)
-- Each Buddy can view their own referral branch, while admins can view the full network to help trace connections and contact the right people if an issue occurs; do not expose private contact details in the tree
+- Start with contribution scores, redeemable service points, and rankings; plan to add gift-card rewards later
+- Record referrals as a multi-generation network tree (referrer → referred Buddy → their referrals); add the detailed user-facing tree view after launch
+- Each Buddy can eventually view their own referral branch, while admins can view the full network to help trace connections and contact the right people if an issue occurs; do not expose private contact details in the tree
 - When a post includes a reward or other material benefit, include a clear advertising/PR disclosure in the suggested copy
 
 ## What is implemented
