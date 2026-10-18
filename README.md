@@ -5,6 +5,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 ## Current scope
 
 - Primary home flow: browse Buddy profiles and send direct invitations
+- Scheduled invitations: the requester proposes a date/time and the Buddy accepts or declines
 - Secondary flow: public area-based companion requests
 - Visitors can browse public requests and public profile fields before signup
 - Verified Buddies can apply; only the requester sees the applicant list, compares Buddy profiles and 30-minute rates, then selects one Buddy before the deadline
