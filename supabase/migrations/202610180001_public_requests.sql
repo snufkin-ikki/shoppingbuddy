@@ -64,11 +64,23 @@ create table if not exists public.request_applications (
 create index if not exists request_applications_request_created_idx
   on public.request_applications (request_id, created_at);
 
+create table if not exists public.request_messages (
+  id uuid primary key default gen_random_uuid(),
+  request_id uuid not null references public.public_requests(id) on delete cascade,
+  sender_id uuid not null references auth.users(id) on delete cascade,
+  body text not null check (char_length(body) between 1 and 2000),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists request_messages_request_created_idx
+  on public.request_messages (request_id, created_at);
+
 alter table public.public_profiles enable row level security;
 alter table public.buddy_verifications enable row level security;
 alter table public.public_requests enable row level security;
 alter table public.request_private_details enable row level security;
 alter table public.request_applications enable row level security;
+alter table public.request_messages enable row level security;
 
 -- Public visitors can read only the deliberately public profile fields.
 create policy "public profiles are viewable"
@@ -143,6 +155,28 @@ create policy "verified buddies apply to open requests"
     )
   );
 
+create policy "matched parties read request messages"
+  on public.request_messages for select to authenticated
+  using (
+    exists (
+      select 1 from public.public_requests r
+      where r.id = request_id
+        and r.status = 'matched'
+        and (r.requester_id = auth.uid() or r.selected_buddy_id = auth.uid())
+    )
+  );
+create policy "matched parties send request messages"
+  on public.request_messages for insert to authenticated
+  with check (
+    sender_id = auth.uid()
+    and exists (
+      select 1 from public.public_requests r
+      where r.id = request_id
+        and r.status = 'matched'
+        and (r.requester_id = auth.uid() or r.selected_buddy_id = auth.uid())
+    )
+  );
+
 -- Explicit table grants keep the client surface limited to the intended operations.
 grant select on public.public_profiles to anon, authenticated;
 grant insert, update on public.public_profiles to authenticated;
@@ -151,6 +185,7 @@ grant insert on public.public_requests to authenticated;
 grant select on public.request_private_details to authenticated;
 grant insert on public.request_private_details to authenticated;
 grant select, insert on public.request_applications to authenticated;
+grant select, insert on public.request_messages to authenticated;
 grant select on public.buddy_verifications to authenticated;
 
 -- One atomic choice: the requester selects exactly one applicant.
