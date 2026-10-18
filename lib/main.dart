@@ -82,8 +82,8 @@ class _BoardState extends State<Board> {
         SizedBox(height: 10), Text('行きたい場所ややりたいことを投稿して、地元のBuddyと出会おう。'),
         SizedBox(height: 12), Text('✓ 応募できるのは本人確認済みBuddyです', style: TextStyle(color: Color(0xFF36594B), fontWeight: FontWeight.w600)),
       ]))),
-      SliverToBoxAdapter(child: SizedBox(height: 48, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 16), children: areas.map((x) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ChoiceChip(label: Text(x), selected: area == x, onSelected: (_) => setState(() => area = x)))).toList())),
-      SliverToBoxAdapter(child: SizedBox(height: 48, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 16), children: cats.map((x) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ChoiceChip(label: Text(x), selected: category == x, onSelected: (_) => setState(() => category = x)))).toList())),
+      SliverToBoxAdapter(child: SizedBox(height: 48, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 16), children: areas.map((x) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ChoiceChip(label: Text(x), selected: area == x, onSelected: (_) => setState(() => area = x)))).toList()))),
+      SliverToBoxAdapter(child: SizedBox(height: 48, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 16), children: cats.map((x) => Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ChoiceChip(label: Text(x), selected: category == x, onSelected: (_) => setState(() => category = x)))).toList()))),
       SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 18, 20, 12), child: Text('相方募集  (' + shown.length.toString() + '件)', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)))),
       SliverPadding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 100), sliver: SliverList(delegate: SliverChildBuilderDelegate((context, i) {
         final r = shown[i];
