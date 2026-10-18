@@ -31,13 +31,15 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 
 ## Buddy growth and contribution tracking
 
+- Guiding principle: Buddy talent quality drives service quality; continuously look for shareable UX and reward verified contributions that improve talent quality, successful matches, or nationwide growth
 - Every Buddy whose profile passes review can participate in the referral program from launch
 - Give each approved Buddy a unique tracked profile/referral link and a ready-to-share social post
 - Attribute new Buddy applications to the referring profile
 - Keep an admin contribution ledger for applications, approved profiles, first completed paid matches, contribution scores, redeemable service points, and rankings
 - For a directly referred Buddy, award 200 service points and 200 contribution points to the direct referrer when the profile passes review, then an additional 400 service points and 400 contribution points when the Buddy completes their first paid match (600 points total for each balance)
 - For a second-generation referral ("grandchild Buddy"), award 100 service points and 100 contribution points once to the original referrer when the grandchild Buddy's profile passes review; no extra second-generation match-completion bonus is included at launch
-- Award contribution scores and service points for quality milestones rather than raw applications
+- Award contribution scores and service points for quality milestones rather than raw applications or share counts alone
+- Consider future point moments when they produce measurable value: a referred Buddy's first completed match, quality profile improvements, useful post-match feedback (regardless of whether it is positive), a shared public request that leads to a match, or the first verified Buddy supply in a new city; these are candidate ideas and not all are launch commitments
 - Track contribution scores separately from redeemable service points, so using points does not lower a person's ranking
 - Redeemable service points are for the user's side of a future Buddy booking; they cannot be cashed out or transferred
 - Keep the Buddy's agreed compensation intact when a customer uses points; the platform funds the point discount
