@@ -16,6 +16,13 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Card payments first; Bitcoin is out of initial scope
 - Buddy fees are set in JPY; show an approximate conversion in the visitor’s currency
 
+## Launch decisions
+
+- Buddy profiles can cover multiple areas
+- Enable matching in an area once at least 2 verified Buddy profiles are registered for it; areas open independently
+- Primary MVP success metric: number of matches formed
+- Initial target: 10 matches in the first month
+
 ## What is implemented
 
 - Flutter board screen with area and category filters
