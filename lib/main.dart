@@ -63,6 +63,19 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
 
   bool get areaReady => visibleBuddies.length >= 2;
 
+  Future<void> openBuddyApplication() async {
+    final submitted = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (_) => const BuddyApplicationSheet(),
+    );
+    if (submitted != true || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Buddy登録申請をデモ送信しました。審査後に掲載されます')),
+    );
+  }
+
   void openPublicBoard() {
     Navigator.of(context).push(MaterialPageRoute<void>(
       builder: (_) => const Board(),
@@ -239,6 +252,12 @@ class _BuddyDirectoryState extends State<BuddyDirectory> {
             ),
           ),
         ],
+        const SizedBox(height: 14),
+        OutlinedButton.icon(
+          onPressed: openBuddyApplication,
+          icon: const Icon(Icons.person_add_alt_1),
+          label: const Text('Buddyとして参加申請'),
+        ),
         const SizedBox(height: 18),
         OutlinedButton.icon(
           onPressed: openPublicBoard,
@@ -374,6 +393,181 @@ class _DemoDirectInviteResultSheetState
             const Text('デモ操作です。実際のお誘い・返事・決済は保存されません。',
               style: TextStyle(fontSize: 12, color: Color(0xFF6B706B))),
           ],
+        ),
+      ),
+    ),
+  );
+}
+
+class BuddyApplicationSheet extends StatefulWidget {
+  const BuddyApplicationSheet({super.key});
+
+  @override
+  State<BuddyApplicationSheet> createState() => _BuddyApplicationSheetState();
+}
+
+class _BuddyApplicationSheetState extends State<BuddyApplicationSheet> {
+  final formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
+  final introController = TextEditingController();
+  final instagramController = TextEditingController();
+  final areasSelected = <String>{};
+  final categoriesSelected = <String>{'遊'};
+  String? selectionError;
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    introController.dispose();
+    instagramController.dispose();
+    super.dispose();
+  }
+
+  void submit() {
+    final validFields = formKey.currentState?.validate() ?? false;
+    setState(() {
+      selectionError = areasSelected.isEmpty || categoriesSelected.isEmpty
+          ? 'エリアとジャンルをそれぞれ1つ以上選んでください'
+          : null;
+    });
+    if (!validFields || selectionError != null) return;
+    Navigator.of(context).pop(true);
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      22, 22, 22, MediaQuery.viewInsetsOf(context).bottom + 24,
+    ),
+    child: SafeArea(
+      child: SingleChildScrollView(
+        child: Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Buddyとして参加申請',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6),
+              const Text('1つのアカウントで利用者・Buddyの両方を使えます。'),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: nameController,
+                maxLength: 20,
+                decoration: const InputDecoration(
+                  labelText: '表示名',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? '表示名を入力してください'
+                    : null,
+              ),
+              TextFormField(
+                controller: introController,
+                maxLength: 160,
+                minLines: 2,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: '自己紹介',
+                  hintText: '好きな街や一緒に楽しみたいこと',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text('活動エリア（複数選択可）',
+                style: TextStyle(fontWeight: FontWeight.w700)),
+              Wrap(
+                spacing: 6,
+                runSpacing: 2,
+                children: areas.skip(1).map((item) => FilterChip(
+                  label: Text(item),
+                  selected: areasSelected.contains(item),
+                  onSelected: (selected) => setState(() {
+                    if (selected) {
+                      areasSelected.add(item);
+                    } else {
+                      areasSelected.remove(item);
+                    }
+                    selectionError = null;
+                  }),
+                )).toList(),
+              ),
+              const SizedBox(height: 8),
+              const Text('ジャンル',
+                style: TextStyle(fontWeight: FontWeight.w700)),
+              Wrap(
+                spacing: 6,
+                children: cats.skip(1).map((item) => FilterChip(
+                  label: Text(item),
+                  selected: categoriesSelected.contains(item),
+                  onSelected: (selected) => setState(() {
+                    if (selected) {
+                      categoriesSelected.add(item);
+                    } else {
+                      categoriesSelected.remove(item);
+                    }
+                    selectionError = null;
+                  }),
+                )).toList(),
+              ),
+              if (selectionError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(selectionError!,
+                    style: const TextStyle(color: Colors.red)),
+                ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: '1000',
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Buddy料金（30分あたり・円）',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  final rate = int.tryParse(value ?? '');
+                  if (rate == null || rate < 500) return '500円以上で入力してください';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: instagramController,
+                keyboardType: TextInputType.url,
+                decoration: const InputDecoration(
+                  labelText: '公開InstagramのURL',
+                  hintText: 'https://www.instagram.com/...',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value == null ||
+                    !value.contains('instagram.com/')
+                    ? 'InstagramのURLを入力してください'
+                    : null,
+              ),
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F5F2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  '公開アカウントかつ15投稿以上を運営が確認します。確認が完了するまで、Buddy一覧への掲載・お誘いの受信・募集への応募はできません。デモ申請は保存されません。',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: submit,
+                  child: const Text('Buddy登録を申請（デモ）'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     ),
