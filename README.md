@@ -17,7 +17,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 
 - Flutter board screen with area and category filters
 - Request details and a request creation form (currently in-memory demo data)
-- Supabase SQL migration for public requests, applications, private meeting details, and one-Buddy selection
+- Supabase SQL migration for public requests, private applicant lists, private meeting details, one-Buddy selection, and chat access after selection (before payment)
 
 The SQL migration has not been applied to a Supabase project. The Flutter demo does not yet persist data or provide real signup, Buddy verification, messaging, payment, or push notifications.
 
