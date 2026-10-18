@@ -723,7 +723,7 @@ class _DemoMeetupSheetState extends State<DemoMeetupSheet> {
                 Wrap(
                   spacing: 8,
                   children: [1, 2, 3, 4, 5].map((value) => ChoiceChip(
-                    label: Text('★' * value),
+                    label: Text(List.filled(value, '★').join()),
                     selected: rating == value,
                     onSelected: (_) => setState(() => rating = value),
                   )).toList(),
