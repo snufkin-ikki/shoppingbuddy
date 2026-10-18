@@ -10,7 +10,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Exact meeting details are separated and exposed only to matched participants
 - Direct invitations remain a separate flow
 - Initial areas: Shimokitazawa, Shibuya/Harajuku, Asakusa/Kuramae, Akihabara, Jimbocho, Kyoto, Osaka/Shinsaibashi, Nagoya/Sakae, Fukuoka/Tenjin, Sendai, and Sapporo
-- Japanese and inbound visitors; ja/en/zh-Hans/zh-Hant/ko translations for requests, applications, and chat; immediate, same-day, and scheduled plans
+- Japanese and inbound visitors; planned ja/en/zh-Hans/zh-Hant/ko translations for requests, applications, and chat; immediate, same-day, and scheduled plans
 - Card payments first; Bitcoin is out of initial scope
 
 ## What is implemented
@@ -19,7 +19,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 - Request details and a request creation form (currently in-memory demo data)
 - Supabase SQL migration for public requests, private applicant lists, private meeting details, one-Buddy selection, pre-payment chat, detail confirmation before payment, and source/translation fields
 
-The SQL migration has not been applied to a Supabase project. The Flutter demo does not yet persist data or provide real signup, Buddy verification, messaging, payment, or push notifications.
+The SQL migration has not been applied to a Supabase project. Translation source fields and storage are prepared, but no translation provider is connected. The Flutter demo does not yet persist data or provide real signup, Buddy verification, messaging, payment, or push notifications.
 
 ## Run the Flutter demo
 
