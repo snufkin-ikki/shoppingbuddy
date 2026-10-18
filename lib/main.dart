@@ -6,13 +6,16 @@ const areas = ['すべて','下北沢','渋谷・原宿','浅草・蔵前','秋�
 const cats = ['すべて','衣','美','食','住','遊','電'];
 
 class DemoApplicant {
-  const DemoApplicant(this.name, this.tagline, this.tags, this.rate);
+  const DemoApplicant(
+    this.name, this.tagline, this.tags, this.rate, this.ratePer30m,
+  );
   final String name, tagline, tags, rate;
+  final int ratePer30m;
 }
 
 const demoApplicants = [
-  DemoApplicant('Mana', '古着と小さなギャラリーが好き', '衣・遊', '1,000円 / 30分'),
-  DemoApplicant('Kai', '街の喫茶店や雑貨屋を案内します', '食・住', '1,500円 / 30分'),
+  DemoApplicant('Mana', '古着と小さなギャラリーが好き', '衣・遊', '1,000円 / 30分', 1000),
+  DemoApplicant('Kai', '街の喫茶店や雑貨屋を案内します', '食・住', '1,500円 / 30分', 1500),
 ];
 
 class Request {
@@ -464,6 +467,155 @@ class _RequestComposerState extends State<RequestComposer> {
   );
 }
 
+class DemoChatSheet extends StatefulWidget {
+  const DemoChatSheet({super.key, required this.request, required this.buddy});
+  final Request request;
+  final DemoApplicant buddy;
+
+  @override
+  State<DemoChatSheet> createState() => _DemoChatSheetState();
+}
+
+class _DemoChatSheetState extends State<DemoChatSheet> {
+  final controller = TextEditingController();
+  final messages = <String>[
+    '募集を見て応募しました。ご希望のお店や過ごし方を教えてください。',
+  ];
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  void send() {
+    final message = controller.text.trim();
+    if (message.isEmpty) return;
+    setState(() {
+      messages.add(message);
+      controller.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      20, 20, 20, MediaQuery.viewInsetsOf(context).bottom + 20,
+    ),
+    child: SafeArea(
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height * 0.72,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.buddy.name + 'さんと相談',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            Text(widget.request.area + ' · ' + widget.request.title,
+              maxLines: 1, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 8),
+            const Text('デモチャット · 内容を決めてから支払いに進みます',
+              style: TextStyle(fontSize: 12, color: Color(0xFF6B706B))),
+            const Divider(height: 20),
+            Expanded(
+              child: ListView(
+                children: [
+                  ...messages.map((message) => Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 8, right: 36),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE9EEE9),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(message),
+                    ),
+                  )),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      hintText: 'メッセージを入力',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    onSubmitted: (_) => send(),
+                  ),
+                ),
+                IconButton(
+                  onPressed: send,
+                  icon: const Icon(Icons.send),
+                  tooltip: '送信',
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('内容を確認して支払いへ'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class DemoPaymentSheet extends StatelessWidget {
+  const DemoPaymentSheet({super.key, required this.request, required this.buddy});
+  final Request request;
+  final DemoApplicant buddy;
+
+  @override
+  Widget build(BuildContext context) {
+    final amount = buddy.ratePer30m * request.duration ~/ 30;
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('お支払い内容',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 14),
+            Text('Buddy：' + buddy.name + 'さん'),
+            Text('予定：' + request.area + ' · ' + request.when),
+            Text('時間：' + request.duration.toString() + '分'),
+            const Divider(height: 24),
+            Text('Buddy料金（デモ）：' + amount.toString() + '円',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text('カード払い（Stripe連携予定）'),
+            const SizedBox(height: 8),
+            const Text(
+              'デモ金額です。実サービスでは決済前に確定金額を表示します。',
+              style: TextStyle(fontSize: 12, color: Color(0xFF6B706B)),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('カード決済へ進む（デモ）'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class Board extends StatefulWidget {
   const Board({super.key});
   @override
@@ -479,6 +631,27 @@ class _BoardState extends State<Board> {
     Request('京都でお茶と甘味を楽しみたい','京都','食','10月25日 14:00','地元の人が行くお店にも行ってみたいです。','Yui'),
   ];
   List<Request> get shown => requests.where((r) => (area == 'すべて' || r.area == area) && (category == 'すべて' || r.category == category)).toList();
+
+  Future<void> openChatAndPayment(Request request, DemoApplicant buddy) async {
+    final agreed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (_) => DemoChatSheet(request: request, buddy: buddy),
+    );
+    if (agreed != true || !mounted) return;
+    final paid = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (_) => DemoPaymentSheet(request: request, buddy: buddy),
+    );
+    if (paid == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('デモ画面です。カード決済はStripe連携後に利用できます')),
+      );
+    }
+  }
 
   Future<void> openComposer() async {
     final request = await showModalBottomSheet<Request>(
@@ -565,7 +738,16 @@ class _BoardState extends State<Board> {
                             child: ListTile(
                               leading: const Icon(Icons.check_circle, color: Color(0xFF36594B)),
                               title: Text(r.selectedBuddy! + 'さんを選択しました'),
-                              subtitle: const Text('次はチャットで内容を相談します'),
+                              subtitle: const Text('チャットで内容を相談してから支払いに進みます'),
+                              trailing: TextButton(
+                                onPressed: () {
+                                  final buddy = demoApplicants.firstWhere(
+                                    (item) => item.name == r.selectedBuddy,
+                                  );
+                                  openChatAndPayment(r, buddy);
+                                },
+                                child: const Text('チャット'),
+                              ),
                             ),
                           )
                         else ...demoApplicants.map((applicant) => Card(
@@ -580,9 +762,9 @@ class _BoardState extends State<Board> {
                               onPressed: () {
                                 setState(() => r.selectedBuddy = applicant.name);
                                 Navigator.of(ctx).pop();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(applicant.name + 'さんを選びました')),
-                                );
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (mounted) openChatAndPayment(r, applicant);
+                                });
                               },
                               child: const Text('この人を選ぶ'),
                             ),
