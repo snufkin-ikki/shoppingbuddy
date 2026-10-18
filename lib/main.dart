@@ -22,6 +22,7 @@ class Request {
   final int duration;
   final bool isMine;
   String? selectedBuddy;
+  bool appliedByDemoBuddy = false;
 }
 
 class BuddyApp extends StatelessWidget {
@@ -590,16 +591,35 @@ class _BoardState extends State<Board> {
                         const SizedBox(height: 8),
                         const Text('デモ用の応募者です。実際の応募情報はまだ保存されません。',
                           style: TextStyle(fontSize: 12, color: Color(0xFF6B706B))),
-                      ] else
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: () => ScaffoldMessenger.of(ctx).showSnackBar(
-                              const SnackBar(content: Text('応募には登録とBuddy本人確認が必要です')),
+                      ] else ...[
+                        if (r.appliedByDemoBuddy)
+                          Card(
+                            color: const Color(0xFFE9EEE9),
+                            child: const ListTile(
+                              leading: Icon(Icons.check_circle, color: Color(0xFF36594B)),
+                              title: Text('Buddyとして応募済み（デモ）'),
+                              subtitle: Text('募集者がBuddyを選ぶのを待っています'),
                             ),
-                            child: const Text('この募集に応募する'),
+                          )
+                        else
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: () {
+                                setState(() => r.appliedByDemoBuddy = true);
+                                Navigator.of(ctx).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('デモ応募を一覧に反映しました')),
+                                );
+                              },
+                              child: const Text('Buddyとして応募する（デモ）'),
+                            ),
                           ),
+                        const Text(
+                          'デモ操作です。実際の応募には登録とBuddy本人確認が必要です。',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF6B706B)),
                         ),
+                      ],
                     ],
                   ),
                 ),
