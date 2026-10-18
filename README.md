@@ -4,7 +4,8 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 
 ## Current scope
 
-- Public area-based companion requests
+- Primary home flow: browse Buddy profiles and send direct invitations
+- Secondary flow: public area-based companion requests
 - Visitors can browse public requests and public profile fields before signup
 - Verified Buddies can apply; only the requester sees the applicant list, compares Buddy profiles and 30-minute rates, then selects one Buddy before the deadline
 - Exact meeting details are separated and exposed only to matched participants
@@ -16,6 +17,7 @@ A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan
 ## What is implemented
 
 - Flutter board screen with area and category filters
+- Buddy directory as the home screen; public request board is a secondary flow
 - Request details and a request creation form (currently in-memory demo data)
 - Supabase SQL migration for public requests, private applicant lists, private meeting details, one-Buddy selection, pre-payment chat, detail confirmation before payment, and source/translation fields
 
