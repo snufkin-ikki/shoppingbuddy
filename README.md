@@ -1,90 +1,108 @@
-# Shopping Buddy MVP
+# vinext-starter
 
-A Flutter MVP foundation for meeting a local shopping companion (Buddy) in Japan.
+A clean full-stack starter running on
+[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
+Drizzle support.
 
-## Current scope
+## Prerequisites
 
-- Primary home flow: browse Buddy profiles and send direct invitations
-- Scheduled invitations: the requester proposes a date/time and the Buddy accepts or declines
-- Secondary flow: public area-based companion requests
-- Public requests and public profile fields can be browsed before signup; public request URLs can be shared through social media or messaging
-- Verified Buddies can apply; only the requester sees the applicant list, compares Buddy profiles and 30-minute rates, then selects one Buddy before the deadline
-- Exact meeting details are separated and exposed only to matched participants
-- Direct invitations remain a separate flow
-- Priority recruiting areas: Shimokitazawa, Shibuya/Harajuku, Asakusa/Kuramae, Akihabara, Jimbocho, Kyoto, Osaka/Shinsaibashi, Nagoya/Sakae, Fukuoka/Tenjin, Sendai, and Sapporo
-- Buddy applications are accepted from any city in Japan, including cities outside the priority list
-- Japanese and inbound visitors; planned ja/en/zh-Hans/zh-Hant/ko translations for requests, applications, and chat; immediate, same-day, and scheduled plans
-- Approved Buddy profiles show verified supported languages, including English and Chinese, and visitors can filter/search by language
-- Discovery search gives multilingual profiles a ranking boost over Japanese-only profiles, while respecting selected area, availability, and user filters
-- Card payments first; Bitcoin is out of initial scope
-- Buddy fees are set in JPY; show an approximate conversion in the visitor’s currency
+- Node.js `>=22.13.0`
+- Linux with `flock`, `curl`, and GNU `timeout`
 
-## Launch decisions
+## Sites Lifecycle
 
-- Buddy profiles can cover multiple areas
-- Enable matching independently in each city once at least 2 verified Buddy profiles are registered there; Buddy applications remain open nationwide
-- Open beta without invitation-only access; regular Buddy rates apply during beta when live payments are enabled
-- Launch iOS and Android together
-- Treat inbound use as a strategic launch priority alongside Japanese users
-- Launch with the Buddy referral program: tracked referral links, points redeemable toward the user's Buddy booking, and public nationwide monthly/all-time rankings
-- Each redeemable service point is worth JPY 1 at booking
-- After Buddy verification, present a prewritten social share message and a unique tracked public-profile link; users choose whether to share through the system share sheet
-- Public request pages have shareable URLs that can be sent through social media or messaging; keep exact meeting details and applicant lists private
-- Track inbound-specific indicators: approved multilingual Buddy supply by city, inbound bookings and completed matches, and matching/completion rates by city and language
-- Primary MVP success metric: number of matches formed
-- Initial target: 10 matches in the first month
+The Sites lifecycle CLI runs the locked dependency install before returning this checkout. Edit the source under `app/`, then checkpoint when a coherent milestone is ready to inspect or share. The remote Sites builder runs `npm run build` against the pushed commit. Do not repeat install or build as a normal pre-checkpoint step.
 
-## Buddy growth and contribution tracking
+This starter does not use `wrangler.jsonc`.
 
-- Guiding principle: Buddy talent quality drives service quality; continuously look for shareable UX and reward verified contributions that improve talent quality, successful matches, or nationwide growth
-- Every Buddy whose profile passes review can participate in the referral program from launch
-- Give each approved Buddy a unique tracked profile/referral link and a ready-to-share social post
-- Attribute new Buddy applications to the referring profile
-- Keep an admin contribution ledger for applications, approved profiles, first completed paid matches, contribution scores, redeemable service points, and rankings
-- For a directly referred Buddy, award 200 service points and 200 contribution points to the direct referrer when the profile passes review, then an additional 400 service points and 400 contribution points when the Buddy completes their first paid match
-- If the referred Buddy is approved as able to support customers in English or Chinese, double the approval milestone: 400 points for a directly referred Buddy or 200 points for a second-generation referral. The language bonus is verified during Buddy review and does not stack when a Buddy supports both languages
-- For a second-generation referral ("grandchild Buddy"), award 100 service points and 100 contribution points once to the original referrer when the grandchild Buddy's profile passes review; no extra second-generation match-completion bonus is included at launch
-- Award contribution scores and service points for quality milestones rather than raw applications or share counts alone
-- Consider future point moments when they produce measurable value: a referred Buddy's first completed match, quality profile improvements, useful post-match feedback (regardless of whether it is positive), a shared public request that leads to a match, or the first verified Buddy supply in a new city; these are candidate ideas and not all are launch commitments
-- Track contribution scores separately from redeemable service points, so using points does not lower a person's ranking
-- Redeemable service points are for the user's side of a future Buddy booking; they cannot be cashed out or transferred
-- Keep the Buddy's agreed compensation intact when a customer uses points; the platform funds the point discount
-- Each redeemable service point is worth JPY 1; contribution score values are tracked separately
-- Show nationwide monthly and all-time rankings to all app users
-- When gift-card rewards launch later, start by rewarding the top 3 of the monthly ranking with Starbucks or Amazon gift cards
-- Start with contribution scores, redeemable service points, and rankings; plan to add gift-card rewards later
-- Record referrals as a multi-generation network tree (referrer → referred Buddy → their referrals); add the detailed user-facing tree view after launch
-- Each Buddy can eventually view their own referral branch, while admins can view the full network to help trace connections and contact the right people if an issue occurs; do not expose private contact details in the tree
-- When a post includes a reward or other material benefit, include a clear advertising/PR disclosure in the suggested copy
+`install:ci` is intentionally a single, non-retrying `npm ci`. It refuses a concurrent install for the same project, consumes a matching image-seeded npm cache with `--prefer-offline` while retaining registry fallback for a missing cache object, otherwise downloads and verifies the complete vinext tarball recorded in `package-lock.json`, limits npm to one socket, and terminates a stalled install. `build` applies a short timeout and then validates the Sites artifact. These helpers target Linux and use GNU `timeout`; they are not native macOS scripts.
 
-## What is implemented
+Scripts that need writable project-scoped home, npm, XDG, and temporary paths use `scripts/sites-env.sh`. The `dev` and `start` scripts honor the caller's runtime environment and keep Wrangler logs inside the checkout. The generated `.sites-runtime/` directory is disposable and ignored by Git.
 
-- Flutter board screen with area and category filters
-- Buddy directory as the home screen, filtered by each Buddy's supported areas; demo directory shows the 11 priority areas, while the Buddy application form accepts other cities nationwide; matching opens independently when a city has 2 verified Buddies; public request board is secondary; Buddy form requires Instagram review (demo only)
-- Request creation and applications, requester-only applicant lists with one-Buddy selection, multi-Buddy direct invites that wait for all replies and aggregate accepted rates, pre-payment chat, card payment previews, bilateral completion confirmation, and ratings (currently in-memory demo data)
-- Supabase SQL migration for public requests, private applicant lists, private meeting details, one-Buddy selection, pre-payment chat, detail confirmation before payment, bilateral completion, 24-hour post-completion chat, and source/translation fields
+## Included Shape
 
-The SQL migration has not been applied to a Supabase project. Translation source fields and storage are prepared, but no translation provider is connected. JPY is the rate source; foreign-currency estimates still need a live exchange-rate provider. The Flutter demo does not yet persist data or provide real signup, Buddy verification, messaging, payment, or push notifications.
+- edit site code under `app/`
+- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
+- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
+- `vite.config.ts` simulates declared bindings for local development
+- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
+- `db/schema.ts` starts intentionally empty
+- `examples/d1/` contains an optional D1 example surface
+- `drizzle.config.ts` supports local migration generation when needed
 
-## Run the Flutter demo
+## Workspace Auth Headers
 
-```sh
-flutter pub get
-flutter run
+OpenAI workspace sites can read the current user's email from
+`oai-authenticated-user-email`.
+
+SIWC-authenticated workspace sites may also receive
+`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
+`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
+`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
+
+Treat the full name as optional and fall back to email when it is absent:
+
+```tsx
+import { headers } from "next/headers";
+
+export default async function Home() {
+  const requestHeaders = await headers();
+  const email = requestHeaders.get("oai-authenticated-user-email");
+  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
+  const fullName =
+    encodedFullName &&
+    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
+      "percent-encoded-utf-8"
+      ? decodeURIComponent(encodedFullName)
+      : null;
+
+  const displayName = fullName ?? email;
+  // ...
+}
 ```
 
-## Backend setup still needed
+## Optional Dispatch-Owned ChatGPT Sign-In
 
-Create/configure Supabase, Stripe Connect, and Firebase projects, then connect credentials and implement the production auth/payment/push flows. Do not process real payments until Stripe is configured and tested.
+Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
+optional or required ChatGPT sign-in:
 
-## Stack
+- Use `getChatGPTUser()` for optional signed-in UI.
+- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
+  anonymous visitors through Sign in with ChatGPT.
+- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
+  browser links or actions.
+- Pass a same-origin relative `returnTo` path for the destination after sign-in
+  or sign-out. The helper validates and safely encodes it.
+- Mark protected pages with `export const dynamic = "force-dynamic"` because
+  they depend on per-request identity headers.
 
-- Flutter
-- Supabase Auth and Postgres (planned)
-- Stripe Connect (planned)
-- Firebase Cloud Messaging (planned)
+Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
+OAuth cookies, and identity header injection. Do not implement app routes for
+those reserved paths. Routes that do not import and call the helper remain
+anonymous-compatible.
 
-## Policy context
+SIWC establishes identity only; it does not prove workspace membership. Use the
+Sites hosting platform's access policy controls for workspace-wide restrictions,
+or enforce explicit server-side membership or allowlist checks.
 
-The Japan Tourism Agency's 2026–2030 Tourism Nation Promotion Basic Plan keeps the national goals of 60 million inbound visitors and JPY 15 trillion in inbound tourism spending by 2030, while emphasizing regional visits and sustainable tourism.
-See the [Japan Tourism Agency plan summary](https://www.mlit.go.jp/kankocho/seisaku_seido/kihonkeikaku.html).
+Use SIWC for account pages, user-specific dashboards, saved records, and write
+actions tied to the current ChatGPT user. Leave public content anonymous.
+
+## Diagnostic Commands
+
+- `npm run install:ci`: perform the one bounded lockfile install
+- `npm run dev`: start the Vite/Vinext development server
+- `npm run build`: build and validate the deployable Sites artifact
+- `npm run start`: start the built Vinext application
+- `npm test`: build, validate, and verify the rendered development-preview metadata
+- `npm run validate:artifact`: recheck an existing artifact's manifest and ESM `default.fetch` export
+- `npm run db:generate`: generate Drizzle migrations after schema changes
+
+Use build and validation commands for targeted diagnosis after a remote failure, not as part of the normal checkpoint path.
+
+The timeout defaults can be overridden for a controlled canary with `SITES_INSTALL_TIMEOUT`, `SITES_INSTALL_KILL_AFTER`, `SITES_BUILD_TIMEOUT`, and `SITES_BUILD_KILL_AFTER`. A timeout fails the command; the helpers never retry an unchanged install or build.
+
+## Learn More
+
+- [vinext Documentation](https://github.com/cloudflare/vinext)
+- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)

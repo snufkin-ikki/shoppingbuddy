@@ -1,0 +1,1 @@
+ALTER TABLE `buddy_search_requests` ADD `contacted_at_ms` integer;
