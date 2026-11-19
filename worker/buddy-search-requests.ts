@@ -1,4 +1,4 @@
-import { maxAreaLength, maxDescriptionLength, normalizeLineContact } from "../app/buddy-search-request";
+import { maxAreaLength, maxDescriptionLength, normalizeBuddySearchBudget, normalizeLineContact } from "../app/buddy-search-request";
 
 const maxBodyLength = 8192;
 const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -32,6 +32,9 @@ export async function handleBuddySearchRequest(request: Request, db: D1Database)
   const area = typeof data.area === "string" ? data.area.trim() : "";
   const description = typeof data.description === "string" ? data.description.trim() : "";
   const lineKind = data.lineKind;
+  const budget = normalizeBuddySearchBudget(data.budget);
+  // A cached form from before the budget field may still submit without it.
+  if (data.budget !== undefined && budget === null) return reply(400, "ご予算の上限を確認してください。");
   if (typeof id !== "string" || !requestIdPattern.test(id) || !area || area.length > maxAreaLength
       || !description || description.length > maxDescriptionLength) {
     return reply(400, "エリアと探しているBuddyの希望を確認してください。");
@@ -42,9 +45,9 @@ export async function handleBuddySearchRequest(request: Request, db: D1Database)
 
   try {
     await db.prepare(`INSERT INTO buddy_search_requests
-      (id, created_at_ms, area, description, line_kind, line_contact)
-      VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING`)
-      .bind(id, Date.now(), area, description, lineKind, lineContact).run();
+      (id, created_at_ms, area, description, line_kind, line_contact, budget_yen)
+      VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING`)
+      .bind(id, Date.now(), area, description, lineKind, lineContact, budget).run();
     return reply(201);
   } catch {
     console.error("Buddy search request could not be saved");

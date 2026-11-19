@@ -1,0 +1,1 @@
+ALTER TABLE `buddy_search_requests` ADD `budget_yen` integer;

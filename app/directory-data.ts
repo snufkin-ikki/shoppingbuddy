@@ -1,5 +1,10 @@
-export const minimumRespectFeeBeforeTax = 5_500;
-export const minimumRespectFee = Math.round(minimumRespectFeeBeforeTax * 1.1);
+import { matchesDestinationArea } from "./travel-destinations";
+import { matchesBuddyAge, occupationsByBuddy } from "./buddy-discovery-filters";
+
+// Profile fees are stored as the tax-exclusive rate for 60 minutes.
+export const minimumRespectFeeBeforeTax = 9_000;
+export const respectFeeWithTax = (feeBeforeTax: number) => Math.round(feeBeforeTax * 1.1);
+export const minimumRespectFee = respectFeeWithTax(minimumRespectFeeBeforeTax);
 
 export const categories = [
  {id:"衣",label:"ファッション",description:"古着・洋服・靴・小物",icon:"♧",color:"#ac553f"},
@@ -18,14 +23,14 @@ export const profiles = [
  {id:"satoshi-miya",categories:["遊","衣"],name:"宮 聡（Satoshi Miya）",description:"DJ・ダンサー／ヨガイベントプロデューサー",gender:"未設定",areas:["渋谷","代官山中目黒"],tags:["ダンス","DJ","レコード","ヨガ","アスレジャー"],fee:11000,image:"/miya-satoshi.jpg",kind:"miya",coverBadges:["ヨガと音楽をつなぐDJ", "ダンサー・ヨガイベント企画"] as const},
  {"id": "ucci", "categories": ["衣", "遊"], "name": "内田洋茂（ウッチー）", "description": "キャスティングプロデューサー / Digress-Lab LLC CEO", "gender": "未設定", "areas": ["渋谷", "原宿表参道"], "tags": ["裏原宿", "ストリートブランド", "レコード屋", "ダンサー", "HIPHOP", "アウトドア"], "fee": 50000, "image": "/ucci-seaside-wide.png", "kind": "ucci", coverBadges:["Instagram 4.8万人", "キャスティングプロデューサー"] as const},
  {"id": "tetsuya-oi", "categories": ["遊", "衣"], "name": "大井てつや（Ted）", "description": "スポーツトレーナー", "gender": "未設定", "areas": ["新宿", "渋谷", "銀座有楽町"], "tags": ["HYROX", "トレーニング", "ランニング", "ウォーキング", "整体", "公園フィットネス", "防災体力"], "fee": 13000, "image": "/ted-outdoor-profile.jpeg", "kind": "ted", coverBadges:["Instagram 1万人", "スポーツトレーナー"] as const},
- {"id": "ikki-yokoji", "categories": ["衣", "住", "遊"], "name": "ヨコジ / 横路一樹", "description": "shopping×tech起業家", "gender": "未設定", "areas": ["渋谷", "原宿表参道", "下北沢", "新宿", "代官山中目黒", "丸の内日比谷", "銀座有楽町", "横浜"], "tags": ["ブランド古着", "ファミリーセール", "リサイクルショップ", "フリーマーケット会場", "自転車", "セレクトショップ", "雑貨屋"], "fee": minimumRespectFee, "image": "/ikki-yokoji.jpg", "kind": "ikki", coverBadges:["ファッションアテンダント創業者", "shopping×tech起業家"] as const},
- {"id": "coco", "categories": ["遊"], "name": "Coco", "description": "世界を旅するフォトグラファー", "gender": "未設定", "areas": ["博多天神", "下北沢", "沖縄", "カンボジア"], "tags": ["写真", "フォトグラファー", "写真展", "旅", "海外旅行", "留学"], "fee": minimumRespectFee, "image": "/coco-camera-profile.png", "kind": "coco", coverBadges:["旅先での出会いと、写真のある時間", "世界を旅するフォトグラファー"] as const},
+ {"id": "ikki-yokoji", "categories": ["衣", "住", "遊"], "name": "ヨコジ / 横路一樹", "description": "shopping×tech起業家", "gender": "未設定", "areas": ["渋谷", "原宿表参道", "下北沢", "新宿", "代官山中目黒", "丸の内日比谷", "銀座有楽町", "横浜"], "tags": ["ブランド古着", "ファミリーセール", "リサイクルショップ", "フリーマーケット会場", "自転車", "セレクトショップ", "雑貨屋"], "fee": minimumRespectFeeBeforeTax, "image": "/ikki-yokoji.jpg", "kind": "ikki", coverBadges:["ファッションアテンダント創業者", "shopping×tech起業家"] as const},
+ {"id": "coco", "categories": ["遊"], "name": "Coco", "description": "世界を旅するフォトグラファー", "gender": "未設定", "areas": ["博多天神", "下北沢", "沖縄", "カンボジア"], "tags": ["写真", "フォトグラファー", "写真展", "旅", "海外旅行", "留学"], "fee": minimumRespectFeeBeforeTax, "image": "/coco-camera-profile.png", "kind": "coco", coverBadges:["旅先での出会いと、写真のある時間", "世界を旅するフォトグラファー"] as const},
  {"id": "lua-soda", "categories": ["食"], "name": "ソウダルア", "description": "出張料理人・現代美食家", "gender": "未設定", "areas": ["豊洲", "築地", "足立市場"], "tags": ["出張料理", "旬の食材", "スパイス", "食文化", "フードアート", "地産地消"], "fee": 20000, "image": "/lua-soda.jpg", "kind": "lua", coverBadges:["土地の食材と物語を、料理でつなぐ", "出張料理人・現代美食家"] as const},
  {"id": "ayano-tominaga", "categories": ["電"], "name": "富永あやの", "description": "ITジャーナリスト・自撮り端末研究家", "gender": "未設定", "areas": ["渋谷", "秋葉原", "銀座"], "tags": ["スマートフォン", "iPhone", "Galaxy", "自撮り", "動画撮影", "スマホアクセサリー", "スキャナー", "デジタル活用"], "fee": 38000, "image": "/ayano-tominaga.jpg", "kind": "ayano", coverBadges:["X 11,658人", "Instagram 1万人"] as const},
  {id:"tapi-style",categories:["衣"],name:"tapi.style",description:"TAKAHIRO YANAGIDA",gender:"未設定",areas:["高円寺","渋谷","原宿表参道","下北沢"],tags:["古着","ヴィンテージ","スーツ","ドレス","セレクトショップ"],fee:30000,image:"/tapi-style-wide.jpeg",kind:"tapi",coverBadges:["Instagram 7.3万人", "ファッションは自由だ！"] as const},
  {id:"mimic-takara",categories:["衣","遊"],name:"mimic宝",description:"下北沢 × 古着屋店主",gender:"未設定",areas:["下北沢"],tags:["ヴィンテージ","古着屋","レコード屋","ノンフィクション","古着屋店主"],fee:30000,image:"/mimic-documentary.jpeg",kind:"mimic",coverBadges:["下北沢の古着屋店主", "フジTVノンフィクション出演"] as const},
  {id:"waki-masayuki",categories:["遊"],name:"和氣正幸",description:"本屋ライター ＆ 本屋店主",gender:"未設定",areas:["神保町","祖師ヶ谷大蔵"],tags:["古本","古書","文房具"],fee:20000,image:"/waki-bookshop.jpeg",kind:"waki",coverBadges:["X 14,384人", "本屋ライター・書店店主"] as const},
- {id:"shibalife",categories:["住","遊"],name:"柴田花菜（しばてぃん）",description:"旅と宿とサウナづくり",gender:"未設定",areas:["渋谷","中目黒"],tags:["サウナ","インテリア","家具","ゴルフ"],fee:15000,image:"/shibata-kana-sauna.png",kind:"shiba",coverBadges:["Instagram 6,669人", "旅と宿とサウナづくり"] as const},
+ {id:"shibalife",categories:["住","遊"],name:"柴田花菜（しばてぃん）",description:"旅と宿とサウナづくり",gender:"未設定",areas:["渋谷","中目黒"],tags:["サウナ","インテリア","家具","ゴルフ"],fee:minimumRespectFeeBeforeTax,image:"/shibata-kana-sauna.png",kind:"shiba",coverBadges:["Instagram 6,669人", "旅と宿とサウナづくり"] as const},
  {id:"mari-kumagai",categories:["美"],name:"熊谷真理",description:"メイク講師 ＆ コスメコンシェルジュ",gender:"未設定",areas:["表参道","渋谷","新宿"],tags:["メイク","コスメ","起業家","メイク講師","コスメコンシェルジュ"],fee:20000,image:"/mari-card-portrait.jpg",kind:"mari",coverBadges:["Instagram 7,252人", "メイク講師・コスメコンシェルジュ"] as const},
  {id:"takashi-yokoishi",categories:["遊"],name:"横石崇",description:"プロジェクトプロデューサー",gender:"未設定",areas:["渋谷"],tags:["書店","雑貨屋","蔦屋書店","工芸品","プロダクト製品","MOMA"],fee:20000,image:"/yokoishi-portrait.jpeg",kind:"yokoishi",coverBadges:["『自己紹介2.0』 著者", "プロジェクトプロデューサー"] as const},
  {id:"mayumi-asakura",categories:["美","衣"],name:"朝倉真弓",description:"ウォーキング講師、グレイヘアモデル",gender:"未設定",areas:["二子玉川","横浜","渋谷","原宿表参道","新宿","銀座有楽町"],tags:["ファッション","化粧品"],fee:11000,image:"/mayumi-books-wide.jpeg",kind:"mayumi",coverBadges:["自著・共著9冊出版", "ウォーキング講師・グレイヘアモデル"] as const}
@@ -40,12 +45,15 @@ function normalizeSearch(value: string) {
     .replace(/じんぼうちょう|jinbocho|jim bocho|jimbocho/g, "神保町");
 }
 
-export function filterProfiles(query: string, area: string, gender: string, sort: string, category = "") {
+export function filterProfiles(query: string, area: string, gender: string, sort: string, category = "", age = "", occupation = "") {
   const words = normalizeSearch(query).trim().split(/\s+/).filter(Boolean);
+  const now = new Date();
   return profiles.filter(profile => {
     if (category && !profile.categories.includes(category)) return false;
-    if (area && (area === "未設定" ? profile.areas.length > 0 : !profile.areas.some(place => place === area))) return false;
+    if (area && (area === "未設定" ? profile.areas.length > 0 : !matchesDestinationArea(profile.areas, area))) return false;
     if (gender && profile.gender !== gender) return false;
+    if (age && !matchesBuddyAge(profile.id, age, now)) return false;
+    if (occupation && !occupationsByBuddy[profile.id]?.some(role => role === occupation)) return false;
     const search = normalizeSearch([profile.name, profile.description, ...profile.tags, ...profile.areas].join(" "));
     return words.every(word => search.includes(word.replace(/^#/, "")));
   }).sort((a, b) => sort === "price"
@@ -58,7 +66,7 @@ export function lowerPriceBuddies(source: BuddyProfile, area: string) {
   const sourceTags = new Set(source.tags.map(normalizeSearch));
   return profiles.flatMap(profile => {
     const fee = profile.fee;
-    if (profile.id === source.id || fee >= sourceFee || (area && !profile.areas.some(place => place === area))) return [];
+    if (profile.id === source.id || fee >= sourceFee || (area && !matchesDestinationArea(profile.areas, area))) return [];
     const sharedTags = profile.tags.filter(tag => sourceTags.has(normalizeSearch(tag)));
     const sharesCategory = profile.categories.some(category => source.categories.includes(category));
     return [{ profile, fee, sharedTags, sharesCategory }];

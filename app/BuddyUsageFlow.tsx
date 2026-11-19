@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import RespectFeeVideo from "./RespectFeeVideo";
 import type { SiteLanguage } from "./site-language";
 
 const pictograms = [
@@ -64,8 +65,8 @@ const copy = {
     next: "次のステップ",
     steps: [
       ["相方を探す／募集する", "好きな街・趣味から、気になる相方を。"],
-      ["オファーを出す", "「一緒に歩こう！」とお誘い。"],
-      ["チャットで相談", "行きたい街や場所、案内してほしいことや体験の希望をBuddyと相談。集合場所、時間、料金も確認します。"],
+      ["オファーを出す", "気になる登録Buddyにお誘いするか、募集に応募したBuddyから相方を選びます。"],
+      ["マッチ成立後にチャットで相談", "行きたい街や場所、案内してほしいことや体験の希望をBuddyと相談。集合場所、時間、料金も確認します。"],
       ["リスペクトフィーを支払う", "合意したリスペクトフィーをShopping Buddyに支払います。Buddyはサービスを通じて報酬を受け取ります。"],
       ["待ち合わせる", "約束の場所で「はじめまして！」"],
       ["一緒に街歩き！", "相方とおしゃべりしながら、気の向くままに街を歩こう。ウインドウショッピングも気軽に。"],
@@ -80,8 +81,8 @@ const copy = {
     next: "Next step",
     steps: [
       ["Find a Buddy or post a request", "Search by neighborhood or interest, or post a request with your preferred time and plans."],
-      ["Send an offer", "Send a walk offer to a Buddy you found or someone who responded to your request."],
-      ["Talk in chat", "Discuss the neighborhood, places to visit and experiences you’d like. Confirm where to meet, the duration and the fee."],
+      ["Send an offer", "Send an offer to a Buddy you found, or choose someone who responds to your request."],
+      ["Chat after matching", "Discuss the neighborhood, places to visit and experiences you’d like. Confirm where to meet, the duration and the fee."],
       ["Pay the respect fee", "Pay the agreed respect fee to Shopping Buddy. Your Buddy receives compensation through the service."],
       ["Meet up", "Meet at the agreed time and somewhere easy to find, such as a station entrance."],
       ["Enjoy the neighborhood together", "Chat with your Buddy and wander wherever you feel like going. You can window-shop along the way, too."],
@@ -96,8 +97,8 @@ const copy = {
     next: "下一步",
     steps: [
       ["寻找伙伴或发布需求", "按街区或兴趣寻找伙伴，也可以填写时间和计划来发布同行需求。"],
-      ["发出邀请", "向你找到的伙伴，或回应你需求的伙伴发出同行邀请。"],
-      ["通过聊天沟通", "与 Buddy 商量想去的街区、地点和想体验的活动，并确认集合地点、时长和费用。"],
+      ["发出邀请", "向中意的已注册伙伴发出邀请，或从回应你的人中选择同行伙伴。"],
+      ["匹配后通过聊天沟通", "与 Buddy 商量想去的街区、地点和想体验的活动，并确认集合地点、时长和费用。"],
       ["支付同行酬谢费", "向 Shopping Buddy 支付约定费用，Buddy 通过平台获得报酬。"],
       ["按约会合", "在约好的时间，到车站检票口等容易找到的地点会合。"],
       ["一起享受街区漫步", "和伙伴边走边聊，随心逛逛街区。路过感兴趣的橱窗，也可以停下来看看。"],
@@ -108,11 +109,27 @@ const copy = {
   },
 };
 
+const paymentStep = 3;
+
 export default function BuddyUsageFlow({ locale }: { locale: SiteLanguage }) {
   const content = copy[locale];
   const trackRef = useRef<HTMLOListElement>(null);
   const [activeStep, setActiveStep] = useState(0);
   const lastStep = content.steps.length - 1;
+
+  useEffect(() => {
+    function revealLinkedFee() {
+      if (location.hash !== "#respect-fee-video") return;
+      const track = trackRef.current;
+      if (!track) return;
+      track.scrollTo({ left: paymentStep * track.clientWidth, behavior: "instant" });
+      setActiveStep(paymentStep);
+      requestAnimationFrame(() => document.getElementById("respect-fee-video")?.scrollIntoView({ block: "center" }));
+    }
+    revealLinkedFee();
+    window.addEventListener("hashchange", revealLinkedFee);
+    return () => window.removeEventListener("hashchange", revealLinkedFee);
+  }, []);
 
   function goToStep(index: number) {
     const track = trackRef.current;
@@ -176,6 +193,9 @@ export default function BuddyUsageFlow({ locale }: { locale: SiteLanguage }) {
       <button type="button" className="buddy-usage-arrow" aria-label={content.next} aria-controls="buddy-usage-steps" disabled={activeStep === lastStep} onClick={() => goToStep(activeStep + 1)}>
         <span aria-hidden="true">→</span>
       </button>
+    </div>
+    <div className="buddy-usage-fee" hidden={activeStep !== paymentStep}>
+      <RespectFeeVideo locale={locale} />
     </div>
     <div className="buddy-usage-demo">
       <p>{content.demo}</p>

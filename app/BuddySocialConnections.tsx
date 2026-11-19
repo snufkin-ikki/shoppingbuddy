@@ -1,5 +1,6 @@
 import type { BuddyProfile } from "./directory-data";
 import type { SiteLanguage } from "./site-language";
+import BuddySocialConnectionsVideo from "./BuddySocialConnectionsVideo";
 
 const networks = {
   instagram: "Instagram",
@@ -16,7 +17,7 @@ type Preferences = Partial<Record<Network, Preference>>;
 // Record a preference only after the Buddy confirms it. Missing entries are unconfirmed.
 const buddyPreferences: Partial<Record<BuddyProfile["id"], Preferences>> = {
   "ikki-yokoji": {
-    instagram: "mutual",
+    instagram: "follow-only",
     x: "mutual",
     linkedin: "mutual",
     facebook: "mutual",
@@ -27,24 +28,30 @@ const buddyPreferences: Partial<Record<BuddyProfile["id"], Preferences>> = {
 const copy = {
   ja: {
     heading: "相互フォロー・つながり",
-    ask: "街歩きのあと、お互いが希望すれば、表示されているSNSでつながれます。",
+    mutual: "相互フォローOK",
+    followOnly: "フォロー歓迎・相互フォローなし",
+    followNote: "Buddyからのフォローバックや個別のつながりはありません。",
     unknown: "相互につながれるSNSは未確認です。",
     none: "相互につながれるSNSはありません。",
-    note: "街歩きの依頼にあたり、相互フォロー・つながりは任意です。",
+    note: "SNSでの交流は任意です。リスペクトフィーは街歩きの料金です。",
   },
   en: {
-    heading: "Mutual follows & connections",
-    ask: "You can connect after the walk if you both agree.",
+    heading: "Follows & connections",
+    mutual: "Mutual follows welcome",
+    followOnly: "Followers welcome · no follow-back",
+    followNote: "The Buddy does not follow back or connect individually on these platforms.",
     unknown: "This Buddy’s mutual connection preferences are unconfirmed.",
     none: "This Buddy does not offer mutual social connections.",
-    note: "Mutual follows and connections are optional.",
+    note: "Social connections are optional. The respect fee covers the walk.",
   },
   zh: {
-    heading: "互相关注与添加好友",
-    ask: "街区漫步结束后，双方同意即可互相关注或添加好友。",
+    heading: "关注与联系",
+    mutual: "可互相关注",
+    followOnly: "欢迎关注 · 不回关",
+    followNote: "Buddy 不会在这些平台回关或添加好友。",
     unknown: "这位伙伴尚未确认可以互相关注的平台。",
     none: "这位伙伴没有开放互相关注的平台。",
-    note: "互相关注或添加好友由双方自愿决定。",
+    note: "社交平台上的互动由双方自愿决定。同行酬谢费是街区漫步的费用。",
   },
 };
 
@@ -55,17 +62,26 @@ export default function BuddySocialConnections({ buddyId, locale }: {
   const preferences = buddyPreferences[buddyId] ?? {};
   const channels = Object.keys(networks) as Network[];
   const mutual = channels.filter(channel => preferences[channel] === "mutual");
+  const followOnly = channels.filter(channel => preferences[channel] === "follow-only");
   const allConfirmed = channels.every(channel => preferences[channel] !== undefined);
   const labels = copy[locale];
 
   return <section className="buddy-social-connections" aria-labelledby="buddy-social-connections-title">
     <h3 id="buddy-social-connections-title">{labels.heading}</h3>
     {mutual.length > 0 ? <>
-      <ul aria-label={labels.heading}>
+      <h4>{labels.mutual}</h4>
+      <ul aria-label={labels.mutual}>
         {mutual.map(channel => <li key={channel}>{networks[channel]}</li>)}
       </ul>
-      <p>{labels.ask}</p>
     </> : <p>{allConfirmed ? labels.none : labels.unknown}</p>}
-    <p className="buddy-social-connections-note">{labels.note}</p>
+    {followOnly.length > 0 && <div className="buddy-social-follow-only">
+      <h4>{labels.followOnly}</h4>
+      <ul aria-label={labels.followOnly}>
+        {followOnly.map(channel => <li key={channel}>{networks[channel]}</li>)}
+      </ul>
+      <p>{labels.followNote}</p>
+    </div>}
+    <p className="buddy-social-connections-note" id="buddy-social-connections-note">{labels.note}</p>
+    <BuddySocialConnectionsVideo key={buddyId} locale={locale} />
   </section>;
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { minimumRespectFee } from "../directory-data";
-import { maxAreaLength } from "../buddy-search-request";
+import { maxAreaLength, normalizeBuddySearchBudget } from "../buddy-search-request";
 import { homeHref, siteLanguage } from "../site-language";
 import BuddySearchForm from "./BuddySearchForm";
+import BuddyFinderVideo from "./BuddyFinderVideo";
 import { finderCopy } from "./copy";
 
 type FinderParams = { area?: string | string[]; duration?: string; budget?: string; interests?: string; lang?: string };
@@ -17,8 +17,9 @@ export default async function FindABuddy({ searchParams }: { searchParams: Promi
   const language = siteLanguage(lang);
   const copy = finderCopy[language];
   const initialArea = typeof area === "string" ? area.trim().slice(0, maxAreaLength) : "";
-  const initialDescription = duration === "60" && typeof budget === "string" && /^\d{1,7}$/.test(budget) && Number(budget) >= minimumRespectFee
-    ? copy.preferences(duration, Number(budget).toLocaleString("ja-JP"), typeof interests === "string" ? interests.trim().slice(0, 80) : "")
+  const initialBudget = duration === "60" ? normalizeBuddySearchBudget(budget) : null;
+  const initialDescription = initialBudget !== null
+    ? copy.preferences("60", typeof interests === "string" ? interests.trim().slice(0, 80) : "")
     : "";
 
   return <main lang={language} className="vintage-entry buddy-finder">
@@ -28,8 +29,9 @@ export default async function FindABuddy({ searchParams }: { searchParams: Promi
     </header>
     <section className="buddy-finder-panel">
       <h1>{copy.title}</h1>
-      <p className="buddy-finder-lead">{copy.lead}</p>
-      <BuddySearchForm initialArea={initialArea} initialDescription={initialDescription} language={language} />
+      <p className="buddy-finder-lead" id="buddy-finder-lead">{copy.lead}</p>
+      <BuddyFinderVideo language={language} />
+      <BuddySearchForm initialArea={initialArea} initialDescription={initialDescription} initialBudget={initialBudget} language={language} />
     </section>
   </main>;
 }

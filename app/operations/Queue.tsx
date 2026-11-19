@@ -10,6 +10,7 @@ type Item = {
   receivedAt: number;
   area: string;
   description: string | null;
+  budget: number | null;
   lineKind: "id" | "link" | null;
   lineContact: string | null;
 };
@@ -87,6 +88,7 @@ export default function Queue() {
             {" · "}{Math.max(0, Math.floor((Date.now() - item.receivedAt) / 86_400_000))}日経過</p>
           {item.kind === "line" ? <>
             <h2>{item.area}</h2><p className="user-voice-body">{item.description}</p>
+            <p>ご予算の上限（税込） <strong>{item.budget == null ? "未入力" : item.budget.toLocaleString("ja-JP") + "円"}</strong></p>
             {item.lineKind === "link" ? <a href={normalizeLineContact(item.lineKind, item.lineContact) ?? undefined} target="_blank" rel="noopener noreferrer">LINEプロフィールを開く</a>
               : <p>LINE ID <strong>{item.lineContact}</strong></p>}
             <div className="user-voice-controls">

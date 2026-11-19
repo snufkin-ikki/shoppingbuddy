@@ -1,39 +1,47 @@
 "use client";
 
-import ChapterVideo from "./ChapterVideo";
+import PictogramVideo from "./PictogramVideo";
 import { useRef } from "react";
+import { minimumRespectFeeBeforeTax, minimumRespectFee } from "./directory-data";
 import type { SiteLanguage } from "./site-language";
 
-const chapterTimes = [0.1, 5.2, 12.2, 17.1, 24.2, 29.3] as const;
-const chapterTitles = {
-  ja: ["リスペクトフィーとは", "1時間の最低料金", "30分換算", "行きたい街・体験を相談", "Shopping Buddyに支払う", "待ち合わせ・街歩き"],
-  en: ["What is the fee?", "Minimum for one hour", "30-minute equivalent", "Discuss where to go and what to do", "Pay Shopping Buddy", "Meet and walk"],
-  zh: ["什么是同行酬谢费？", "一小时最低费用", "30分钟折算", "商量地点与体验", "向 Shopping Buddy 付款", "会合并逛街"],
-};
-const controls = {
-  ja: { play: "再生", pause: "一時停止", choose: "場面を選ぶ", unavailable: "再生できませんでした。もう一度お試しください。" },
-  en: { play: "Play", pause: "Pause", choose: "Choose a scene", unavailable: "Could not play the video. Please try again." },
-  zh: { play: "播放", pause: "暂停", choose: "选择场景", unavailable: "无法播放，请重试。" },
-};
+const formatYen = (amount: number) => amount.toLocaleString("ja-JP");
+const hourlyFee = formatYen(minimumRespectFee);
+const halfHourFeeBeforeTax = formatYen(minimumRespectFeeBeforeTax / 2);
 
 const copy = {
   ja: {
     title: "リスペクトフィーって？",
-    watch: "6つの場面で見る（34秒）",
+    unit: "30分",
+    price: `${halfHourFeeBeforeTax}円`,
+    tax: "＋税から",
+    total: `最低60分（税込${hourlyFee}円から）`,
+    equivalent: "以降30分単位",
+    watch: "動画を見る（34秒）",
     close: "閉じる",
-    description: "リスペクトフィーは、Buddyと過ごす時間の利用料金です。行きたい街や場所、案内してほしい体験をBuddyと相談し、時間と料金も確認します。お支払い先はShopping Buddyです。Buddyはサービスを通じて報酬を受け取ります。最低料金は1時間5,500円＋税（税込6,050円）です。30分換算は2,750円＋税（税込3,025円）で、利用は1時間からです。",
+    description: "リスペクトフィーは、Buddyと過ごす時間の利用料金です。行きたい街や場所、案内してほしい体験をBuddyと相談し、時間と料金も確認します。お支払い先はShopping Buddyです。Buddyはサービスを通じて報酬を受け取ります。最低料金は30分4,500円（税抜）からです。最低利用時間は60分（税込9,900円から）で、以降は30分単位です。",
   },
   en: {
     title: "What is a respect fee?",
-    watch: "Watch the six scenes (34 seconds)",
+    unit: "30 min from",
+    price: `¥${halfHourFeeBeforeTax}`,
+    tax: "+ tax",
+    total: `60 min minimum (¥${hourlyFee} incl. tax)`,
+    equivalent: "30 min increments",
+    watch: "Watch video (34 sec)",
     close: "Close",
-    description: "The respect fee covers time spent with your Buddy. Discuss the neighborhood, places you want to visit, and experiences you’d like, along with the duration and fee. You pay Shopping Buddy, and your Buddy receives compensation through the service. The minimum is one hour at ¥6,050 including tax, equivalent to ¥3,025 per 30 minutes.",
+    description: "The respect fee covers time spent with your Buddy. Discuss the neighborhood, places you want to visit, and experiences you’d like, along with the duration and fee. You pay Shopping Buddy, and your Buddy receives compensation through the service. Rates start at ¥4,500 before tax per 30 minutes, with a 60-minute minimum of ¥9,900 including tax. Time beyond the minimum is billed in 30-minute increments.",
   },
   zh: {
     title: "什么是同行酬谢费？",
-    watch: "观看6个场景（34秒）",
+    unit: "30分钟",
+    price: `${halfHourFeeBeforeTax}日元`,
+    tax: "（未税）起",
+    total: `至少60分钟（含税${hourlyFee}日元起）`,
+    equivalent: "之后按30分钟计费",
+    watch: "观看视频（34秒）",
     close: "关闭",
-    description: "同行酬谢费是你与 Buddy 一起逛街的费用。先商量想去的街区、地点和想体验的活动，再确认时长和费用。你向 Shopping Buddy 付款，Buddy 通过平台获得报酬。最低时长为一小时，含税6,050日元，折合每30分钟3,025日元。",
+    description: "同行酬谢费是你与 Buddy 一起逛街的费用。先商量想去的街区、地点和想体验的活动，再确认时长和费用。你向 Shopping Buddy 付款，Buddy 通过平台获得报酬。每30分钟4,500日元起（未税），至少预约60分钟（含税9,900日元起），之后按30分钟计费。",
   },
 };
 
@@ -52,7 +60,18 @@ export default function RespectFeeVideo({ locale }: { locale: SiteLanguage }) {
         onClick={() => dialog.current?.showModal()}
       >
         <img src="/respect-fee-six-thumb.webp" width="52" height="52" alt="" />
-        <span><strong>{text.title}</strong><small>{text.watch}</small></span>
+        <span className="respect-fee-video-copy">
+          <span className="respect-fee-video-label">{text.title}</span>
+          <span className="respect-fee-video-rate">
+            <span>{text.unit}</span>
+            <span><strong>{text.price}</strong> <small>{text.tax}</small></span>
+          </span>
+          <small className="respect-fee-video-detail">
+            <span>{text.total}</span>
+            <span>{text.equivalent}</span>
+          </small>
+          <span className="respect-fee-video-watch">{text.watch}</span>
+        </span>
         <span className="respect-fee-video-play" aria-hidden="true">▶</span>
       </button>
       <dialog
@@ -67,14 +86,13 @@ export default function RespectFeeVideo({ locale }: { locale: SiteLanguage }) {
             <button type="submit" aria-label={text.close}>×</button>
           </form>
         </div>
-        <ChapterVideo
+        <PictogramVideo
           videoRef={video}
           src="/respect-fee-platform.mp4"
           poster="/respect-fee-six-poster.webp"
           label={text.title}
           descriptionId="respect-fee-video-description"
-          chapters={chapterTimes.map((time, index) => [time, chapterTitles[locale][index]] as const)}
-          controls={controls[locale]}
+          language={locale}
         />
         <p id="respect-fee-video-description">{text.description}</p>
       </dialog>

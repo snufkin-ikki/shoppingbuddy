@@ -12,13 +12,13 @@ export async function handleOperationsQueue(request: Request, db: D1Database, op
       const page = Number(url.searchParams.get("page") ?? "0");
       if (!Number.isSafeInteger(page) || page < 0 || page > 500) return reply({ error: "指定が無効です。" }, 400);
       const { results } = await db.prepare(`
-        SELECT id, 'line' AS kind, created_at_ms AS receivedAt, area, description, line_kind AS lineKind, line_contact AS lineContact
+        SELECT id, 'line' AS kind, created_at_ms AS receivedAt, area, description, line_kind AS lineKind, line_contact AS lineContact, budget_yen AS budget
           FROM buddy_search_requests WHERE contacted_at_ms IS NULL
         UNION ALL
-        SELECT id, 'review', submitted_at, buddy_id, NULL, NULL, NULL
+        SELECT id, 'review', submitted_at, buddy_id, NULL, NULL, NULL, NULL
           FROM user_voice WHERE status = 'pending'
         UNION ALL
-        SELECT id, 'introduction', submitted_at, target_id, author_id, NULL, NULL
+        SELECT id, 'introduction', submitted_at, target_id, author_id, NULL, NULL, NULL
           FROM buddy_peer_introductions WHERE status = 'pending'
         ORDER BY receivedAt, id LIMIT 21 OFFSET ?
       `).bind(page * 20).all();

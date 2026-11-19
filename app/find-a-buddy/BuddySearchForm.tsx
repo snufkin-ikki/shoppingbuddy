@@ -1,13 +1,14 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { maxAreaLength, maxDescriptionLength, maxLineContactLength, normalizeLineContact } from "../buddy-search-request";
+import { maxAreaLength, maxDescriptionLength, maxLineContactLength, maxBuddySearchBudget, normalizeBuddySearchBudget, normalizeLineContact } from "../buddy-search-request";
 
+import { minimumRespectFee } from "../directory-data";
 import { homeHref, type SiteLanguage } from "../site-language";
 import { finderCopy } from "./copy";
 
-export default function BuddySearchForm({ initialArea, initialDescription, language }: {
-  initialArea: string; initialDescription: string; language: SiteLanguage;
+export default function BuddySearchForm({ initialArea, initialDescription, initialBudget, language }: {
+  initialArea: string; initialDescription: string; initialBudget: number | null; language: SiteLanguage;
 }) {
   const copy = finderCopy[language];
   const [lineKind, setLineKind] = useState<"id" | "link">("id");
@@ -23,9 +24,14 @@ export default function BuddySearchForm({ initialArea, initialDescription, langu
     const form = new FormData(event.currentTarget);
     const area = String(form.get("area") ?? "").trim();
     const description = String(form.get("description") ?? "").trim();
+    const budget = normalizeBuddySearchBudget(form.get("budget"));
     const lineContact = normalizeLineContact(lineKind, form.get("lineContact"));
     if (!area || !description) {
       setError(copy.missing);
+      return;
+    }
+    if (budget === null) {
+      setError(copy.badBudget(minimumRespectFee.toLocaleString(language)));
       return;
     }
     if (!lineContact) {
@@ -42,7 +48,7 @@ export default function BuddySearchForm({ initialArea, initialDescription, langu
       const response = await fetch("/api/buddy-search-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: requestId.current, area, description, lineKind, lineContact, website: form.get("website") }),
+        body: JSON.stringify({ id: requestId.current, area, description, budget, lineKind, lineContact, website: form.get("website") }),
       });
       const result = await response.json();
       if (response.ok && result.ok) {
@@ -72,6 +78,12 @@ export default function BuddySearchForm({ initialArea, initialDescription, langu
       <label>{copy.description} <span>{copy.required}</span>
         <textarea name="description" required maxLength={maxDescriptionLength} rows={4} defaultValue={initialDescription}
           placeholder={copy.descriptionExample} />
+      </label>
+      <label>{copy.budget} <span>{copy.required}</span>
+        <input name="budget" type="number" inputMode="numeric" required step={1} min={minimumRespectFee}
+          max={maxBuddySearchBudget} defaultValue={initialBudget ?? undefined} placeholder={copy.budgetExample}
+          aria-describedby="buddy-finder-budget-note" />
+        <small id="buddy-finder-budget-note">{copy.budgetNote(minimumRespectFee.toLocaleString(language))}</small>
       </label>
       <fieldset className="buddy-finder-contact" aria-describedby="buddy-finder-contact-note">
         <legend>{copy.contact} <span>{copy.either}</span></legend>

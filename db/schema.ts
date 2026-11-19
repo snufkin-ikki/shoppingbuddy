@@ -6,6 +6,7 @@ export const buddySearchRequests = sqliteTable("buddy_search_requests", {
   contactedAt: integer("contacted_at_ms"),
   area: text("area").notNull(),
   description: text("description").notNull(),
+  budget: integer("budget_yen"),
   lineKind: text("line_kind", { enum: ["id", "link"] }).notNull(),
   lineContact: text("line_contact").notNull(),
 });

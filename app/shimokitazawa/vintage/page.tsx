@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { filterProfiles, minimumRespectFee, walkStyles } from "../../directory-data";
+import { filterProfiles, respectFeeWithTax, walkStyles } from "../../directory-data";
 import { entrySource, sampleShopSource, vintageDemoHref, vintageEntryPath, vintageFilters } from "../../shimokitazawa-entry";
 import { buddySearchRequestHref } from "../../buddy-search-request";
 import EntryTools from "./EntryTools";
@@ -46,7 +46,7 @@ export default async function ShimokitazawaVintage({ searchParams }: {
           <img src={profile.image} width={480} height={330} alt={`${profile.name}のプロフィール写真`} loading="lazy" />
           <div>
             <h3>{profile.name}</h3>
-            {profile.fee !== null && <p className="vintage-price">リスペクトフィー · 1時間 · {profile.fee.toLocaleString("ja-JP")}円{profile.fee === minimumRespectFee && "（税込）"}</p>}
+            {profile.fee !== null && <p className="vintage-price">リスペクトフィー · 30分 · {(profile.fee / 2).toLocaleString("ja-JP")}円（税抜） · 最低60分（税込{respectFeeWithTax(profile.fee).toLocaleString("ja-JP")}円）</p>}
             <p>{walkStyles[profile.id] ?? profile.description}</p>
             <a href={vintageDemoHref(source, profile.id)}>プロフィールを見る <span aria-hidden="true">→</span></a>
           </div>

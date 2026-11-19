@@ -1,7 +1,7 @@
 "use client";
 
+import TravelDestinations from "./TravelDestinations";
 import BuddyUsageFlow from "./BuddyUsageFlow";
-import RespectFeeVideo from "./RespectFeeVideo";
 import ProfileShare from "./ProfileShare";
 import BuddySocialConnections from "./BuddySocialConnections";
 import TodayWalk, { type WalkStage } from "./TodayWalk";
@@ -15,8 +15,9 @@ import { currentVintageSource, recordVintageDemoStep, vintageEntryId, vintageEnt
 import { validVintageSlot, vintageWalkDuration, vintageWalkTitle } from "./shimokitazawa-slots";
 import { PocWeeklySummary, usePocDemo } from "./poc-demo";
 import ProfileWindows from "./ProfileWindows";
-import { areas, categories, profiles, filterProfiles, minimumRespectFeeBeforeTax, minimumRespectFee, mediaFeatures, walkExamples, walkStyles } from "./directory-data";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ageDecades, knownExactAges, occupations } from "./buddy-discovery-filters";
+import { areas, categories, profiles, filterProfiles, respectFeeWithTax, mediaFeatures, walkExamples, walkStyles } from "./directory-data";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 const buddyTerms = {
   ja: { passion: "このBuddyの偏愛", more: "ほかの偏愛を見る", fee: "リスペクトフィー", definition: "リスペクトフィーは、Buddyと過ごす時間の利用料金です。お支払い先はShopping Buddyです。" },
@@ -82,12 +83,13 @@ type RequestDetails = {
 
 const requestDraftKey = "shopping-buddy-request-draft-v1";
 const bookmarkStorageKey = "shopping-buddy-bookmarks-v1";
+const requestMinutes = { "1時間": 60, "1時間30分": 90, "2時間": 120, "2時間30分": 150, "3時間": 180 };
 const requestDefaults = { title: "", area: "下北沢", when: "今すぐ", dateTime: "", duration: "1時間", deadline: "24時間" };
 
 const directoryExtras = {
-  ja: { hour: "1時間", saved: "保存したBuddy", save: "あとで見る", remove: "保存を解除", empty: "保存したBuddyはまだいません。一覧の「あとで見る」で保存できます。" },
-  en: { hour: "1 hour", saved: "Saved Buddies", save: "Save for later", remove: "Remove saved Buddy", empty: "No saved Buddies yet. Save one to find them here." },
-  zh: { hour: "1小时", saved: "已收藏的同伴", save: "收藏", remove: "取消收藏", empty: "还没有收藏的同伴。可以从列表中收藏。" },
+  ja: { halfHour: "30分", saved: "保存したBuddy", save: "あとで見る", remove: "保存を解除", empty: "保存したBuddyはまだいません。一覧の「あとで見る」で保存できます。" },
+  en: { halfHour: "30 min", saved: "Saved Buddies", save: "Save for later", remove: "Remove saved Buddy", empty: "No saved Buddies yet. Save one to find them here." },
+  zh: { halfHour: "30分钟", saved: "已收藏的同伴", save: "收藏", remove: "取消收藏", empty: "还没有收藏的同伴。可以从列表中收藏。" },
 };
 
 const comparisonStorageKey = "shopping-buddy-comparison";
@@ -222,14 +224,16 @@ export default function Home() {
   useEffect(()=>{const saved=localStorage.getItem("shopping-buddy-locale");if(saved==="en"||saved==="zh")setLocale(saved);},[]);
   useEffect(()=>{localStorage.setItem("shopping-buddy-locale",locale);document.documentElement.lang=locale;},[locale]);
   const copy = {
-    ja:{location:"下北沢駅周辺⌄",heroEyebrow:"SHOPPING BUDDY / NEAR YOU",heroTop:"今から1時間、",heroBottom:"街を歩こう。",heroLead:"古着、本、喫茶店。好きなことへの「偏愛」を持つクリエイターと、街歩きやウインドウショッピングを楽しもう。",availability:`1時間・${minimumRespectFeeBeforeTax.toLocaleString("ja-JP")}円＋税（税込${minimumRespectFee.toLocaleString("ja-JP")}円）から`,findBuddy:"街・偏愛からBuddyを探す",purchaseNote:"見るだけでもOK。買い物は必須ではありません。",interests:"好きなこと・偏愛から探す",directoryTitle:"どの街で、誰と歩く？",directoryLead:"クリエイターそれぞれの偏愛から、気が合いそうな街歩きの相方を探そう。",genreTitle:"好きなジャンルから探す",allGenres:"すべてのジャンル",keyword:"名前・好きなこと",keywordPlaceholder:"古着、本、サウナ、名前など",city:"都市・エリア",allAreas:"すべてのエリア",gender:"性別",allGenders:"すべての性別",filterNote:"エリアは登録済みタグをもとに表示しています。実際の対応場所・日時は要確認です。",results:"人のバディ",clear:"条件をクリア",sort:"並び順",registered:"登録順",newest:"新着順",priceSort:"リスペクトフィーが低い順",profilePrice:"プロフィールを見る →",back:"← 一覧に戻る"},
-    en:{location:"Near Shimokitazawa Station⌄",heroEyebrow:"SHOPPING BUDDY / NEAR YOU",heroTop:"Take an hour,",heroBottom:"walk the neighborhood.",heroLead:"Vintage, books, cafés. Walk and window-shop with a creator who loves what you love.",availability:`From ¥${minimumRespectFee.toLocaleString("en-US")} for one hour (incl. tax)`,findBuddy:"Find a buddy by area or interest",purchaseNote:"Browsing is welcome. You can enjoy the walk without buying anything.",interests:"Explore by interest",directoryTitle:"Where would you like to walk?",directoryLead:"Find a companion by neighborhood and interests.",genreTitle:"Start with a category you love.",allGenres:"All categories",keyword:"Name or interests",keywordPlaceholder:"Vintage, books, sauna, a name…",city:"City / neighborhood",allAreas:"All areas",gender:"Gender",allGenders:"Any gender",filterNote:"Areas are based on registered profile tags. Please confirm availability and meeting details.",results:" buddies",clear:"Clear filters",sort:"Sort by",registered:"Registration order",newest:"Newest",priceSort:"Lowest respect fee",profilePrice:"Profile & rates →",back:"← Back to directory"},
-    zh:{location:"下北泽站附近⌄",heroEyebrow:"SHOPPING BUDDY / 附近",heroTop:"留出一小时，",heroBottom:"逛逛这座城市。",heroLead:"古着、书籍、咖啡馆。和热爱这些事物的创作者一起漫步、逛街。",availability:`1小时起，${minimumRespectFee.toLocaleString("zh-CN")}日元起（含税）`,findBuddy:"按街区或兴趣寻找同伴",purchaseNote:"只逛逛也欢迎，购买商品由您决定。",interests:"按兴趣探索",directoryTitle:"想和谁逛哪条街？",directoryLead:"按区域和兴趣寻找你的城市同伴。",genreTitle:"先从喜欢的类别开始。",allGenres:"全部类别",keyword:"姓名或兴趣",keywordPlaceholder:"古着、书籍、桑拿或姓名…",city:"城市 / 区域",allAreas:"所有区域",gender:"性别",allGenders:"不限性别",filterNote:"区域依据个人资料中登记的标签显示。集合地点和时间请另行确认。",results:"位同伴",clear:"清除筛选",sort:"排序",registered:"登记顺序",newest:"最新登记",priceSort:"按同行酬谢费从低到高",profilePrice:"查看资料与费用 →",back:"← 返回列表"}
+    ja:{location:"下北沢駅周辺⌄",heroEyebrow:"SHOPPING BUDDY / NEAR YOU",heroTop:"今から1時間、",heroBottom:"街を歩こう。",heroLead:"古着、本、喫茶店。好きなことへの「偏愛」を持つクリエイターと、街歩きやウインドウショッピングを楽しもう。",purchaseNote:"見るだけでもOK。買い物は必須ではありません。",interests:"好きなこと・偏愛から探す",directoryTitle:"どの街で、誰と歩く？",directoryLead:"クリエイターそれぞれの偏愛から、気が合いそうな街歩きの相方を探そう。",genreTitle:"好きなジャンルから探す",allGenres:"すべてのジャンル",keyword:"名前・好きなこと",keywordPlaceholder:"古着、本、サウナ、名前など",city:"都市・エリア",allAreas:"すべてのエリア",gender:"性別",allGenders:"すべての性別",filterNote:"エリアは登録済みタグをもとに表示しています。実際の対応場所・日時は要確認です。",results:"人のバディ",clear:"条件をクリア",sort:"並び順",registered:"登録順",newest:"新着順",priceSort:"リスペクトフィーが低い順",profilePrice:"プロフィールを見る →",back:"← 一覧に戻る"},
+    en:{location:"Near Shimokitazawa Station⌄",heroEyebrow:"SHOPPING BUDDY / NEAR YOU",heroTop:"Take an hour,",heroBottom:"walk the neighborhood.",heroLead:"Vintage, books, cafés. Walk and window-shop with a creator who loves what you love.",purchaseNote:"Browsing is welcome. You can enjoy the walk without buying anything.",interests:"Explore by interest",directoryTitle:"Where would you like to walk?",directoryLead:"Find a companion by neighborhood and interests.",genreTitle:"Start with a category you love.",allGenres:"All categories",keyword:"Name or interests",keywordPlaceholder:"Vintage, books, sauna, a name…",city:"City / neighborhood",allAreas:"All areas",gender:"Gender",allGenders:"Any gender",filterNote:"Areas are based on registered profile tags. Please confirm availability and meeting details.",results:" buddies",clear:"Clear filters",sort:"Sort by",registered:"Registration order",newest:"Newest",priceSort:"Lowest respect fee",profilePrice:"Profile & rates →",back:"← Back to directory"},
+    zh:{location:"下北泽站附近⌄",heroEyebrow:"SHOPPING BUDDY / 附近",heroTop:"留出一小时，",heroBottom:"逛逛这座城市。",heroLead:"古着、书籍、咖啡馆。和热爱这些事物的创作者一起漫步、逛街。",purchaseNote:"只逛逛也欢迎，购买商品由您决定。",interests:"按兴趣探索",directoryTitle:"想和谁逛哪条街？",directoryLead:"按区域和兴趣寻找你的城市同伴。",genreTitle:"先从喜欢的类别开始。",allGenres:"全部类别",keyword:"姓名或兴趣",keywordPlaceholder:"古着、书籍、桑拿或姓名…",city:"城市 / 区域",allAreas:"所有区域",gender:"性别",allGenders:"不限性别",filterNote:"区域依据个人资料中登记的标签显示。集合地点和时间请另行确认。",results:"位同伴",clear:"清除筛选",sort:"排序",registered:"登记顺序",newest:"最新登记",priceSort:"按同行酬谢费从低到高",profilePrice:"查看资料与费用 →",back:"← 返回列表"}
   }[locale];
   const [query,setQuery] = useState("");
   const [area,setArea] = useState("");
   const [category,setCategory] = useState("");
   const [gender,setGender] = useState("");
+  const [age, setAge] = useState("");
+  const [occupation, setOccupation] = useState("");
   const [sort,setSort] = useState("registered");
   const [page,setPage] = useState(1);
   const [profileView, setProfileView] = useState<{id: string; section: ProfileSection} | null>(null);
@@ -240,8 +244,8 @@ export default function Home() {
   const [savedOnly, setSavedOnly] = useState(false);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const extras = directoryExtras[locale];
-  const matches = useMemo(() => filterProfiles(query, area, gender, sort, category),
-    [query, area, gender, sort, category]);
+  const matches = useMemo(() => filterProfiles(query, area, gender, sort, category, age, occupation),
+    [query, area, gender, sort, category, age, occupation]);
   const results = savedOnly ? matches.filter(profile => savedIds.includes(profile.id)) : matches;
 
   useEffect(() => {
@@ -324,11 +328,23 @@ export default function Home() {
     </button>;
   }
 
+  const advanced = {
+    ja: { title: "詳細条件", age: "年代・年齢", allAges: "すべての年代・年齢", decade: "年代", exact: "年齢", occupation: "職業・活動", allOccupations: "すべての職業・活動", note: "年代・年齢は、公開情報で確認できるBuddyが対象です。" },
+    en: { title: "More filters", age: "Age group or age", allAges: "Any age", decade: "Age group", exact: "Exact age", occupation: "Occupation or activity", allOccupations: "Any occupation or activity", note: "Age filters apply to Buddies with publicly verified age information." },
+    zh: { title: "更多筛选", age: "年龄段或年龄", allAges: "不限年龄", decade: "年龄段", exact: "具体年龄", occupation: "职业或活动", allOccupations: "不限职业或活动", note: "年龄筛选适用于已通过公开资料确认年龄的伙伴。" },
+  }[locale];
+  const decadeLabel = (value: number) => ({ ja: `${value}代`, en: `${value}s`, zh: `${value}–${value + 9} 岁` })[locale];
+  const exactAgeLabel = (value: number) => ({ ja: `${value}歳`, en: `${value} years old`, zh: `${value} 岁` })[locale];
+  const ageOptions = knownExactAges();
+  const ageText = age.startsWith("exact:") ? exactAgeLabel(Number(age.slice(6))) : decadeLabel(Number(age.slice(7)));
+  const occupationText = occupations[occupation as keyof typeof occupations]?.[locale];
   const activeFilters = ([
-    { label: browse.clearQuery, value: query.trim(), clear: setQuery, remaining: ["", area, gender, sort, category] },
-    { label: browse.clearCategory, value: category, clear: setCategory, remaining: [query, area, gender, sort, ""] },
-    { label: browse.clearArea, value: area, clear: setArea, remaining: [query, "", gender, sort, category] },
-    { label: browse.clearGender, value: gender, clear: setGender, remaining: [query, area, "", sort, category] },
+    { label: browse.clearQuery, value: query.trim(), clear: setQuery, remaining: ["", area, gender, sort, category, age, occupation] },
+    { label: browse.clearCategory, value: category, clear: setCategory, remaining: [query, area, gender, sort, "", age, occupation] },
+    { label: browse.clearArea, value: area, clear: setArea, remaining: [query, "", gender, sort, category, age, occupation] },
+    { label: browse.clearGender, value: gender, clear: setGender, remaining: [query, area, "", sort, category, age, occupation] },
+    { label: advanced.age, value: age ? ageText : "", clear: setAge, remaining: [query, area, gender, sort, category, "", occupation] },
+    { label: advanced.occupation, value: occupationText ?? "", clear: setOccupation, remaining: [query, area, gender, sort, category, age, ""] },
   ] satisfies Array<{
     label: string;
     value: string;
@@ -360,12 +376,20 @@ export default function Home() {
     .filter(candidate => candidate.area && candidate.category)
     .slice(0, 3) : [];
 
-  function resetFilters(){setCategory("");setQuery("");setArea("");setGender("");setSavedOnly(false);setPage(1);}
+  function browseTravelArea(destination: string) {
+    resetFilters();
+    setArea(destination);
+    focusBuddyResults();
+  }
+
+  function resetFilters(){setCategory("");setQuery("");setArea("");setGender("");setAge("");setOccupation("");setSavedOnly(false);setPage(1);}
   function selectWalkIdea(idea: (typeof walkIdeas)[number]) {
     setArea(idea.area);
     setCategory(idea.category);
     setQuery(idea.query);
     setGender("");
+    setAge("");
+    setOccupation("");
     setPage(1);
     focusBuddyResults();
   }
@@ -517,12 +541,27 @@ export default function Home() {
   }, []);
   function yenAmount(yen: number | null) {
     if (yen === null) return <strong>{walkCopy.unlisted}</strong>;
-    return <strong className="yen-amount">{yen.toLocaleString("ja-JP")}<span>{locale === "ja" ? "円" : "JPY"}</span>{yen === minimumRespectFee && <small>{{ ja: "（税込）", en: " (incl. tax)", zh: "（含税）" }[locale]}</small>}</strong>;
+    return <strong className="yen-amount">{yen.toLocaleString("ja-JP")}<span>{locale === "ja" ? "円" : "JPY"}</span><small>{{ ja: "（税抜）", en: " (excl. tax)", zh: "（未税）" }[locale]}</small></strong>;
   }
 
-  function price(yen: number | null) {
-    if (yen === null) return yenAmount(yen);
-    return <>{yenAmount(yen)}<span className="usd-price">{fx ? `≈ US$${(yen * fx.rate).toFixed(2)}` : fxError ? "USD換算を取得できません" : "USD換算を取得中…"}</span><span className="btc-price">{btc ? `≈ ${(yen / btc.jpy).toFixed(8)} BTC` : btcError ? "BTC換算を取得できません" : "BTC換算を取得中…"}</span></>;
+  function convertedPrices(yen: number) {
+    return <>
+      <span className="usd-price">{fx ? `≈ US$${(yen * fx.rate).toFixed(2)}` : fxError ? "USD換算を取得できません" : "USD換算を取得中…"}</span>
+      <span className="btc-price">{btc ? `≈ ${(yen / btc.jpy).toFixed(8)} BTC` : btcError ? "BTC換算を取得できません" : "BTC換算を取得中…"}</span>
+    </>;
+  }
+
+  function price(yen: number) {
+    return <>{yenAmount(yen)}{convertedPrices(yen)}</>;
+  }
+
+  function minimumFeeLabel(fee: number) {
+    const amount = respectFeeWithTax(fee).toLocaleString("ja-JP");
+    return {
+      ja: `最低60分（税込${amount}円）・以降30分単位`,
+      en: `60 min minimum (¥${amount} incl. tax) · 30 min increments`,
+      zh: `至少60分钟（含税${amount}日元）· 之后按30分钟计费`,
+    }[locale];
   }
 
   function profilePrices(profile: (typeof profiles)[number]) {
@@ -535,9 +574,9 @@ export default function Home() {
       <ProfileShare key={profile.id + locale} id={profile.id} name={profile.name} topic={topic} locale={locale} />
       <p className="buddy-fee-label">{buddyTerms[locale].fee}</p>
       <div className="profile-prices">
-        <div><small>{extras.hour}</small>{price(profile.fee)}</div>
+        <div><small>{extras.halfHour}</small>{price(profile.fee / 2)}</div>
       </div>
-      <p className="buddy-fee-definition">{buddyTerms[locale].definition}</p>
+      <p className="buddy-fee-definition">{minimumFeeLabel(profile.fee)} · {buddyTerms[locale].definition}</p>
       <details className="inline-help"><summary>{{ ja: "見るだけでも大丈夫？", en: "Can I just browse?", zh: "只逛不买可以吗？" }[locale]}</summary><p>{copy.purchaseNote}</p></details>
     </>;
   }
@@ -575,7 +614,7 @@ export default function Home() {
         && (draft.area === "" || launchAreas.includes(draft.area))
         && ["今すぐ", "今日の午後", "日時を指定"].includes(draft.when)
         && typeof draft.dateTime === "string" && (!draft.dateTime || /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(draft.dateTime))
-        && ["30分", "1時間", "2時間"].includes(draft.duration)
+        && (draft.duration === "30分" || Object.hasOwn(requestMinutes, draft.duration))
         && ["1時間", "6時間", "24時間", "48時間"].includes(draft.deadline)) {
         setDraftFields({ ...draft, duration: draft.duration === "30分" ? requestDefaults.duration : draft.duration });
         setRequestSearchNote("このタブに保存した下書きを開きました。");
@@ -688,15 +727,24 @@ export default function Home() {
   const buddy = useMemo(() => buddies.find((item) => item.id === activeBuddy), [activeBuddy]);
 
   const requestOptions = {
-    ja: { title: "街歩きの相方を探したい", recruit: "日時を決めて相方を募る", recruitNote: "行きたい街と時間を書いて、募集から待ち合わせまでをデモで試せます。", line: "見つかったらLINEで教えて！", lineNote: "運営に希望を送る。折り返し用にLINE IDかプロフィールリンクが必要です。", open: "相方探しの依頼方法を見る" },
-    en: { title: "Find someone to walk with", recruit: "Try posting a walk request", recruitNote: "Choose an area and time, then try the demo from posting to meeting up.", line: "Let me know on LINE", lineNote: "Tell our team who you’re looking for. A LINE ID or profile link is required.", open: "See request options" },
-    zh: { title: "寻找逛街同伴", recruit: "指定时间，发布同行需求", recruitNote: "填写地点和时间，体验从发布需求到会合的演示。", line: "找到后通过 LINE 通知我", lineNote: "向运营团队提交需求。需要填写 LINE ID 或个人主页链接。", open: "查看请求方式" },
+    ja: { offer: "登録Buddyにオファーを出す", offerNote: "プロフィールを見て相方を選ぶ。マッチ成立後はチャットで相談。オファー送信は準備中です。", recruit: "日時を決めて相方を募る", recruitNote: "行きたい街と時間を書いて、募集から待ち合わせまでをデモで試せます。", line: "見つかったらLINEで教えて！", lineNote: "ピンとくるBuddyがいなければ、希望の街・相方・予算を運営に伝えられます。" },
+    en: { offer: "Send an offer to a registered Buddy", offerNote: "Browse profiles. Chat starts after matching. Offer sending is coming soon.", recruit: "Try posting a walk request", recruitNote: "Choose an area and time, then try the demo from posting to meeting up.", line: "Let me know on LINE", lineNote: "Still looking? Tell our team where you want to go, who you’d like to walk with, and your budget." },
+    zh: { offer: "向已注册的 Buddy 发出邀请", offerNote: "浏览个人资料并选择伙伴。匹配后开始聊天。邀请发送功能尚未开放。", recruit: "指定时间，发布同行需求", recruitNote: "填写地点和时间，体验从发布需求到会合的演示。", line: "找到后通过 LINE 通知我", lineNote: "还没找到合适的伙伴？告诉运营团队你想去的街区、想找的伙伴和预算。" },
   }[locale];
+
+  const pageResults = results.slice((page - 1) * 12, page * 12);
+  const lineFinderCard = (
+    <a className="directory-line-finder" href={buddySearchRequestHref(area, undefined, locale)}>
+      <strong>{requestOptions.line} <span aria-hidden="true">→</span></strong>
+      <span>{requestOptions.lineNote}</span>
+    </a>
+  );
 
   const selectedDemoProfile = publicRequest?.selected
     ? profiles.find(profile => `${profile.name}（応募デモ）` === publicRequest.selected)
     : undefined;
-  const demoFee = publicRequest?.duration === "1時間" ? selectedDemoProfile?.fee ?? null : null;
+  const demoDuration = publicRequest ? requestMinutes[publicRequest.duration as keyof typeof requestMinutes] : undefined;
+  const demoFee = selectedDemoProfile && demoDuration ? respectFeeWithTax(selectedDemoProfile.fee * (demoDuration / 60)) : null;
   const resumeWalk = publicRequest?.selected
     ? ({
       matched: ["街歩きの条件をまとめる", "today-walk-next"],
@@ -744,17 +792,21 @@ export default function Home() {
           <h1><span className="headline-line">{copy.heroTop}</span><span className="headline-line">{copy.heroBottom}</span></h1>
           <p className="lead">{copy.heroLead}</p>
           <div className="current-location"><span className="pin">●</span><span className="live-dot" />下北沢駅周辺</div>
-          <p className="availability"><span />{copy.availability}</p>
-          <small className="minimum-fee-equivalent">{{
-            ja: "30分換算 2,750円＋税（税込3,025円）",
-            en: "30-minute equivalent: ¥2,750 + tax (¥3,025 incl. tax)",
-            zh: "折合每30分钟2,750日元（含税3,025日元）",
-          }[locale]}</small>
           <div className="hero-actions">
-            <a className="primary-cta" href="#directory">{copy.findBuddy}<b aria-hidden="true">→</b></a>
-            <RespectFeeVideo locale={locale} />
+            <div className="hero-request-options" id="buddy-request-options">
+              <a className="hero-request-option is-primary" href="#directory">
+                <strong>{requestOptions.offer} <span aria-hidden="true">→</span></strong>
+                <small>{requestOptions.offerNote}</small>
+              </a>
+              <button className="hero-request-option" type="button" onClick={startRequestFromSearch}>
+                <strong>{requestOptions.recruit} <span aria-hidden="true">→</span></strong>
+                <small>{requestOptions.recruitNote}</small>
+              </button>
+            </div>
             <div className="hero-user-links">
-              <a className="hero-recruit-link" href="#buddy-request-options">{requestOptions.open}<span aria-hidden="true"> →</span></a>
+              <a className="hero-recruit-link" href="#travel-destinations">
+                {{ ja: "旅先の街を見る", en: "Explore destinations", zh: "查看旅行目的地" }[locale]} <span aria-hidden="true">↓</span>
+              </a>
               <a className="hero-recruit-link" href="#how-it-works">
                 {{ ja: "ご利用の流れ", en: "How it works", zh: "使用流程" }[locale]} <span aria-hidden="true">↓</span>
               </a>
@@ -781,26 +833,14 @@ export default function Home() {
         <div className="nearby directory-jump"><strong>好きな街、好きなことから。</strong><a href="#directory">登録バディを見る →</a></div>
       </section>
 
+      <TravelDestinations locale={locale} onBrowse={browseTravelArea} />
+
       <BuddyUsageFlow locale={locale} />
 
       {publicRequest && <section className="request-options walk-resume" aria-label="進行中の街歩きデモ">
         <div><p className="request-step">進行中の街歩き · デモ</p><h2>{publicRequest.area} · {publicRequest.duration}</h2><p>{publicRequest.title}</p></div>
         <button type="button" className="request-apply" onClick={() => focusRequestSection(resumeWalk[1])}>{resumeWalk[0]} →</button>
       </section>}
-
-      <section className="request-options" id="buddy-request-options" aria-labelledby="buddy-request-options-title">
-        <h2 id="buddy-request-options-title">{requestOptions.title}</h2>
-        <div className="request-options-grid">
-          <button type="button" onClick={startRequestFromSearch}>
-            <strong>{requestOptions.recruit} <span aria-hidden="true">→</span></strong>
-            <span>{requestOptions.recruitNote}</span>
-          </button>
-          <a href={buddySearchRequestHref(area, undefined, locale)}>
-            <strong>{requestOptions.line} <span aria-hidden="true">→</span></strong>
-            <span>{requestOptions.lineNote}</span>
-          </a>
-        </div>
-      </section>
 
       <section className="public-board" id="public-board" aria-labelledby="public-board-title">
         <div className="public-board-heading"><div><p className="eyebrow">OPEN CALL / FIND A COMPANION</p><h2 id="public-board-title" tabIndex={-1}>同行してほしいBuddyを募る</h2><p>こちらはリスペクトフィーを支払って同行を依頼する利用者さん向けの募集です。行きたい街と希望を公開し、応募したBuddyから1人を選びます。</p></div><span className="public-board-stamp">公開募集<br/>BETA</span></div>
@@ -873,7 +913,7 @@ export default function Home() {
             </div>}
             <div className="request-form-row">
               <label>所要時間<select value={requestDuration} onChange={event => setRequestDuration(event.target.value)}>
-                <option>1時間</option><option>2時間</option>
+                {Object.keys(requestMinutes).map(duration => <option key={duration}>{duration}</option>)}
               </select></label>
               <label>{requestDeadlineLabel}<select value={requestDeadline} onChange={event => setRequestDeadline(event.target.value)}>
                 <option>1時間</option><option>6時間</option><option>24時間</option><option>48時間</option>
@@ -912,7 +952,6 @@ export default function Home() {
         {!detail && <>
         <p className="directory-lead">{copy.directoryLead}</p>
         <p className="buddy-fee-definition directory-fee-definition">{buddyTerms[locale].definition}</p>
-        {results.length > 0 && <a className="buddy-finder-link" href="#buddy-request-options">{requestOptions.open} <span aria-hidden="true">→</span></a>}
         <div className="walk-ideas" aria-labelledby="walk-ideas-title">
           <h3 id="walk-ideas-title">{{ ja: "1時間の街歩きから探す", en: "Find an hour-long walk", zh: "寻找适合的一小时逛街体验" }[locale]}</h3>
           <div className="walk-ideas-options">
@@ -933,8 +972,36 @@ export default function Home() {
         <p className="genre-hint">ジャンル × エリア × キーワードで絞り込み。複数ジャンルに対応するバディもいます。</p>
         <div className="search-panel">
           <label className="keyword-label">{copy.keyword}<input type="search" value={query} onChange={e=>{setQuery(e.target.value);setPage(1);}} placeholder={copy.keywordPlaceholder} /></label>
-          <label>{copy.city}<select value={area} onChange={e=>{setArea(e.target.value);setPage(1);}}><option value="">{copy.allAreas}</option>{areas.map(a=><option key={a}>{a}</option>)}<option>未設定</option></select></label>
-          <details className="extra-filters"><summary>{locale === "ja" ? "詳細条件" : locale === "en" ? "More filters" : "更多筛选"}</summary><label>{copy.gender}<select value={gender} onChange={e=>{setGender(e.target.value);setPage(1);}}><option value="">{copy.allGenders}</option>{["男性","女性","ノンバイナリー","自己記述","未設定"].map(g=><option key={g}>{g}</option>)}</select></label></details>
+          <label>{copy.city}<select value={area} onChange={e=>{setArea(e.target.value);setPage(1);}}><option value="">{copy.allAreas}</option>{areas.map(a=><option key={a}>{a}</option>)}{area && area !== "未設定" && !areas.includes(area) && <option>{area}</option>}<option>未設定</option></select></label>
+          <details className="extra-filters">
+            <summary>{advanced.title}</summary>
+            <div className="extra-filter-fields">
+              <label>{copy.gender}
+                <select value={gender} onChange={event => { setGender(event.target.value); setPage(1); }}>
+                  <option value="">{copy.allGenders}</option>
+                  {["男性", "女性", "ノンバイナリー", "自己記述", "未設定"].map(value => <option key={value}>{value}</option>)}
+                </select>
+              </label>
+              <label>{advanced.age}
+                <select value={age} onChange={event => { setAge(event.target.value); setPage(1); }} aria-describedby="age-filter-note">
+                  <option value="">{advanced.allAges}</option>
+                  <optgroup label={advanced.decade}>
+                    {ageDecades.map(value => <option value={`decade:${value}`} key={value}>{decadeLabel(value)}</option>)}
+                  </optgroup>
+                  {ageOptions.length > 0 && <optgroup label={advanced.exact}>
+                    {ageOptions.map(value => <option value={`exact:${value}`} key={value}>{exactAgeLabel(value)}</option>)}
+                  </optgroup>}
+                </select>
+              </label>
+              <label>{advanced.occupation}
+                <select value={occupation} onChange={event => { setOccupation(event.target.value); setPage(1); }}>
+                  <option value="">{advanced.allOccupations}</option>
+                  {Object.entries(occupations).map(([id, labels]) => <option value={id} key={id}>{labels[locale]}</option>)}
+                </select>
+              </label>
+            </div>
+            <p className="filter-note" id="age-filter-note">{advanced.note}</p>
+          </details>
         </div>
         <div className="area-chips" aria-label="エリアを選ぶ"><button aria-pressed={!area} onClick={()=>{setArea("");setPage(1);}}>すべて</button>{areas.map(a=><button key={a} aria-pressed={area===a} onClick={()=>{setArea(area===a?"":a);setPage(1);}}>{a}</button>)}</div>
         <p className="filter-note">{copy.filterNote}</p>
@@ -963,10 +1030,10 @@ export default function Home() {
             </button>)}
           </div>}
           <div className="empty-result-actions">
-            <a className="buddy-finder-link" href="#buddy-request-options">{requestOptions.open} <span aria-hidden="true">→</span></a>
             <button type="button" onClick={() => { resetFilters(); focusBuddyResults(); }}>{browse.viewAll}</button>
           </div>
-        </div> : <div className="directory-grid">{results.slice((page-1)*12,page*12).map(p=><article className="directory-card photo-card" id={`directory-card-${p.id}`} key={p.id}>
+          {lineFinderCard}
+        </div> : <div className="directory-grid">{pageResults.map((p, index) => <Fragment key={p.id}><article className="directory-card photo-card" id={`directory-card-${p.id}`}>
           <div className={`directory-image photo-cover ${p.kind}`}>{p.kind === "mari" ? <MariCollage/> : p.kind === "ted" ? <TedPortrait/> : p.kind === "ucci" ? <UcciPortrait/> : <img src={p.image} alt={`${p.name}のプロフィール写真`} loading="eager" onError={event=>{event.currentTarget.style.display="none";event.currentTarget.parentElement?.classList.add("image-missing");}} />}<CoverBadges profile={p} /></div>
           <div className="directory-card-heading">
             <h3>{p.name}</h3>
@@ -974,8 +1041,10 @@ export default function Home() {
             <small className="directory-area">{p.areas.join(" / ") || walkCopy.missingArea}</small>
             <p className="buddy-fee-label">{buddyTerms[locale].fee}</p>
             <div className="directory-price">
-              <small>{extras.hour} <span aria-hidden="true">·</span></small>
-              {yenAmount(p.fee)}
+              <small>{extras.halfHour} <span aria-hidden="true">·</span></small>
+              {yenAmount(p.fee / 2)}
+              <span className="directory-converted-prices">{convertedPrices(p.fee / 2)}</span>
+              <span className="directory-minimum-duration">{minimumFeeLabel(p.fee)}</span>
             </div>
             {englishSpeakingBuddies.has(p.id) && <p className="directory-spoken-language">{walkCopy.english}</p>}
           </div>
@@ -999,7 +1068,9 @@ export default function Home() {
             <button className="detail-button" onClick={() => openDirectoryProfile(p.id)}>{copy.profilePrice}</button>
             <div className="directory-card-actions">{comparisonButton(p.id)}{bookmarkButton(p.id)}</div>
           </div>
-        </article>)}</div>}
+        </article>
+          {index + 1 === Math.min(6, pageResults.length) && lineFinderCard}
+        </Fragment>)}</div>}
         {results.length>12 && <nav className="pagination" aria-label="一覧のページ"><button disabled={page===1} onClick={()=>setPage(page-1)}>前へ</button><span>{page} / {Math.ceil(results.length/12)}</span><button disabled={page*12>=results.length} onClick={()=>setPage(page+1)}>次へ</button></nav>}
         
         </>}
@@ -1235,7 +1306,7 @@ export default function Home() {
               <span>
                 <strong>{candidate.profile.name}</strong>
                 <small>{candidate.area} · {categories.find(item => item.id === candidate.category)?.label}</small>
-                <span className="compact-buddy-price"><small>{extras.hour}</small>{price(candidate.profile.fee)}</span>
+                <span className="compact-buddy-price"><small>{extras.halfHour}</small>{price(candidate.profile.fee / 2)}</span>
               </span>
               <span aria-hidden="true">→</span>
             </button>)}
@@ -1284,7 +1355,7 @@ export default function Home() {
                     aria-controls={`compare-card-${profile.id}`}
                     onClick={() => setActiveComparisonId(profile.id)}>
                     <span>{profile.name}</span>
-                    <span className="comparison-summary-price"><small>{extras.hour}</small>{yenAmount(profile.fee)}</span>
+                    <span className="comparison-summary-price"><small>{extras.halfHour}</small>{yenAmount(profile.fee / 2)}</span>
                   </button>
                 </li>
               ))}
@@ -1297,8 +1368,11 @@ export default function Home() {
                 <p>{profile.areas.join(" / ") || "—"}</p>
                 <GenreLabels ids={profile.categories} />
                 <dl>
-                  <dt>{buddyTerms[locale].fee} · {extras.hour}</dt>
-                  <dd className="comparison-price">{price(profile.fee)}</dd>
+                  <dt>{buddyTerms[locale].fee} · {extras.halfHour}</dt>
+                  <dd className="comparison-price">
+                    {price(profile.fee / 2)}
+                    <small className="directory-minimum-duration">{minimumFeeLabel(profile.fee)}</small>
+                  </dd>
                   <dt>{buddyTerms[locale].passion}</dt>
                   <dd>{profile.tags.join(" / ")}</dd>
                   {locale === "ja" && walkStyles[profile.id] && <>

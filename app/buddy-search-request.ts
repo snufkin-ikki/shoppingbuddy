@@ -1,4 +1,13 @@
+import { minimumRespectFee } from "./directory-data";
 import type { SiteLanguage } from "./site-language";
+
+export const maxBuddySearchBudget = 9_999_999;
+
+export function normalizeBuddySearchBudget(value: unknown) {
+  const amount = typeof value === "string" && /^\d{1,7}$/.test(value.trim()) ? Number(value) : value;
+  return typeof amount === "number" && Number.isSafeInteger(amount) &&
+    amount >= minimumRespectFee && amount <= maxBuddySearchBudget ? amount : null;
+}
 
 export const maxAreaLength = 80;
 export const maxDescriptionLength = 600;
