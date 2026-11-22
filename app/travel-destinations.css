@@ -2,7 +2,7 @@
   --map-ink: #233451;
   --map-accent: #2345e6;
   width: min(calc(100% - 40px), 1140px);
-  margin: clamp(32px, 5vw, 66px) auto;
+  margin: clamp(24px, 4vw, 48px) auto 0;
   padding: clamp(16px, 3.8vw, 44px);
   box-sizing: border-box;
   background: #fff;
@@ -55,7 +55,7 @@
 
 .travel-content {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
   align-items: start;
   gap: clamp(16px, 3vw, 30px);
 }

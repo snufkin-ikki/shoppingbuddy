@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import BuddyIntroductionVideo from "./BuddyIntroductionVideo";
 import type { BuddyIntroduction } from "./buddy-introductions";
 import { buddyIntroductions } from "./buddy-introductions";
 import { profiles } from "./directory-data";
@@ -39,8 +38,7 @@ export default function BuddyIntroductions({ profileId, locale, openProfile }: {
     ...(network?.introductions.filter(entry => entry.targetId === profileId) ?? []),
   ].flatMap(introduction => {
     const author = profiles.find(profile => profile.id === introduction.authorId && profile.id !== profileId);
-    const showVideo = profileId === "mimic-takara" && introduction === buddyIntroductions["mimic-takara"][0];
-    return author ? [{ introduction, author, showVideo }] : [];
+    return author ? [{ introduction, author }] : [];
   });
   const outgoingIds = new Set(Object.entries(buddyIntroductions)
     .filter(([, list]) => list.some(entry => entry.authorId === profileId))
@@ -61,7 +59,7 @@ export default function BuddyIntroductions({ profileId, locale, openProfile }: {
   return <section className="buddy-introductions" aria-labelledby="buddy-introductions-title">
     <h3 id="buddy-introductions-title">{copy.title}</h3>
     {entries.length > 0 && <ul className="buddy-introduction-list">
-      {entries.map(({ introduction, author, showVideo }) => <li className="buddy-introduction" key={author.id}>
+      {entries.map(({ introduction, author }) => <li className="buddy-introduction" key={author.id}>
         <div className="buddy-introduction-author">
           <img src={author.image} alt="" width={48} height={48} loading="lazy" />
           <div>
@@ -70,9 +68,8 @@ export default function BuddyIntroductions({ profileId, locale, openProfile }: {
             {introduction.relationship && <p>{introduction.relationship}</p>}
           </div>
         </div>
-        {showVideo && <BuddyIntroductionVideo locale={locale} descriptionId="takara-introduction-strengths" />}
         <dl>
-          <div><dt>{copy.strengths}</dt><dd id={showVideo ? "takara-introduction-strengths" : undefined}>{introduction.strengths}</dd></div>
+          <div><dt>{copy.strengths}</dt><dd>{introduction.strengths}</dd></div>
           <div><dt>{copy.experience}</dt><dd>{introduction.experience}</dd></div>
           <div><dt>{copy.goodFor}</dt><dd>{introduction.goodFor}</dd></div>
         </dl>

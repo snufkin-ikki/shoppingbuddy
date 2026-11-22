@@ -7,15 +7,15 @@ import type { SiteLanguage } from "../site-language";
 const copy = {
   ja: {
     title: "見つかったらLINEで教えて！",
-    watch: "依頼の流れを28秒で見る",
+    watch: "依頼の流れを25秒で見る",
   },
   en: {
     title: "Let me know on LINE",
-    watch: "See how it works in 28 seconds",
+    watch: "See how it works in 25 seconds",
   },
   zh: {
     title: "找到后通过 LINE 通知我",
-    watch: "28 秒了解申请流程",
+    watch: "25 秒了解申请流程",
   },
 };
 
@@ -29,12 +29,12 @@ export default function BuddyFinderVideo({ language }: { language: SiteLanguage 
       <p>{content.watch}</p>
       <PictogramVideo
         videoRef={video}
-        src={`/buddy-finder-${language}.mp4`}
-        poster={`/buddy-finder-${language}.webp`}
+        src={`/buddy-finder-motion-${language}.mp4`}
+        poster={`/buddy-finder-motion-${language}.webp`}
         label={content.title}
         descriptionId="buddy-finder-lead"
-        width={960}
-        height={540}
+        width={800}
+        height={450}
         language={language}
       />
     </section>

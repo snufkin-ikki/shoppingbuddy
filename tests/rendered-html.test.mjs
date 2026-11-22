@@ -14,6 +14,21 @@ async function render(path) {
   return response.text();
 }
 
+test("publishes a wide preview at the LINE sharing link", async () => {
+  const html = await render("/line");
+  assert.match(html, /property="og:image" content="https:\/\/myshopping-buddy\.com\/shopping-buddy-line-preview\.jpg"/);
+  assert.match(html, /property="og:image:height" content="675"/);
+  assert.match(html, /id="directory"/);
+});
+
+test("publishes the square logo preview for shared home links", async () => {
+  const html = await render("/");
+  assert.match(html, /property="og:image" content="https:\/\/myshopping-buddy\.com\/shopping-buddy-share-logo-v1\.jpg"/);
+  assert.match(html, /property="og:image:width" content="1200"/);
+  assert.match(html, /property="og:image:height" content="1200"/);
+  assert.match(html, /name="twitter:image" content="https:\/\/myshopping-buddy\.com\/shopping-buddy-share-logo-v1\.jpg"/);
+});
+
 test("shows a Buddy's area and yen rate before the walk example on the directory card", async () => {
   const html = await render("/");
   const card = html.split('id="directory-card-mimic-takara"')[1]?.split("</article>")[0];
@@ -43,8 +58,8 @@ test("shows the one-hour, ¥9,900 minimum and offers no 30-minute request", asyn
   const publicBoardIndex = html.indexOf('id="public-board"');
   assert.ok(requestOptionsIndex >= 0 && flowIndex > requestOptionsIndex);
   const mainActions = html.slice(requestOptionsIndex, flowIndex);
-  assert.match(mainActions, /href="#directory"[^>]*><strong>登録Buddyにオファーを出す/);
-  assert.match(mainActions, /日時を決めて相方を募る/);
+  assert.match(mainActions, /href="#directory"[^>]*><strong>街歩きの相方を探す/);
+  assert.match(mainActions, /相方を募集する（デモ）/);
   assert.ok(feeIndex > flowIndex && feeIndex < publicBoardIndex);
   assert.match(html.slice(flowIndex, feeIndex), /class="buddy-usage-fee" hidden=""/);
   assert.equal(profilePositions.filter(position => position < lineOptionIndex).length, 6);
@@ -53,7 +68,7 @@ test("shows the one-hour, ¥9,900 minimum and offers no 30-minute request", asyn
   assert.match(feeThumbnail, /30分/);
   assert.match(feeThumbnail, /<strong>4,500円<\/strong>\s*<small>＋税から<\/small>.*最低60分（税込9,900円から）/);
   assert.match(feeThumbnail, /以降30分単位/);
-  assert.match(html, /respect-fee-platform\.mp4/);
+  assert.match(html, /respect-fee-payment-note-ja\.mp4/);
   assert.doesNotMatch(html, /<option[^>]*>30分<\/option>/);
   const fees = [...html.matchAll(/class="yen-amount">([\d,]+)<span>円/g)];
   assert.ok(fees.length > 0);
@@ -85,4 +100,11 @@ test("routes travel destinations to either listed Buddies or an area-prefilled r
   const requestUrl = "/find-a-buddy?area=" + encodeURIComponent("沖縄那覇");
   assert.ok(travel.includes(`href="${requestUrl}"`));
   assert.match(await render(requestUrl), /name="area"[^>]*value="沖縄那覇"/);
+});
+
+test("shows city search and the compact usage flow before the directory", async () => {
+  const html = await render("/");
+  assert.match(html, /id="buddy-request-options"[\s\S]*id="travel-destinations"[\s\S]*id="how-it-works"[\s\S]*id="directory"/);
+  assert.match(html, /街からBuddyを探す<\/h2>[\s\S]*class="travel-cities"[\s\S]*class="travel-map"/);
+  assert.match(html, /id="buddy-usage-title">ご利用の流れ<\/h2><div class="buddy-usage-details"><ol class="buddy-usage-steps"[\s\S]*お互いをレビューしよう！[\s\S]*募集の流れをデモで試す/);
 });

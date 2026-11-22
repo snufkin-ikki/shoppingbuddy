@@ -9,20 +9,20 @@ import "./travel-destinations.css";
 
 const copy = {
   ja: {
-    title: "旅先の街からBuddyを探す",
-    description: "旅先で、地元の「好き」に詳しい相方と街歩き。",
+    title: "街からBuddyを探す",
+    description: "近所でも旅先でも、その街の「好き」に詳しい相方と街歩き。",
     japan: "日本", asia: "アジア", world: "世界", tokyo: "東京",
     region: "地域を選ぶ", registered: "登録Buddyを見る", request: "相方探しを依頼する",
   },
   en: {
-    title: "Find a Buddy for your trip",
-    description: "Explore a city with someone who can share what they love about it.",
+    title: "Find a Buddy by city",
+    description: "Near home or on a trip, explore a city with someone who knows and loves it.",
     japan: "Japan", asia: "Asia", world: "World", tokyo: "Tokyo",
     region: "Choose a region", registered: "See listed Buddies", request: "Ask us to find a Buddy",
   },
   zh: {
-    title: "在旅途中寻找同行伙伴",
-    description: "和熟悉当地、乐于分享自己所爱的人一起逛街。",
+    title: "按城市寻找同行伙伴",
+    description: "无论在家附近还是旅途中，都可以和熟悉当地的伙伴一起漫步。",
     japan: "日本", asia: "亚洲", world: "全球", tokyo: "东京",
     region: "选择地区", registered: "查看已登记的伙伴", request: "委托寻找伙伴",
   },
@@ -65,19 +65,6 @@ export default function TravelDestinations({ locale, onBrowse }: {
       </div>
 
       <div className="travel-content" id="travel-destination-results">
-        <div className="travel-map" aria-hidden="true">
-          <img src={`/travel-map-${region}.webp`} width={1200} height={650} alt="" />
-          {Array.from(markers, ([key, { point: [longitude, latitude], listed }]) => (
-            <span key={key} className="travel-map-marker" data-listed={listed} style={{
-              left: `${(longitude - west) / (east - west) * 100}%`,
-              top: `${(north - latitude) / (north - south) * 100}%`,
-            }}>
-              {region === "japan" && key === destinations[1].point.join(",") &&
-                <span className="travel-map-label">{labels.tokyo}</span>}
-            </span>
-          ))}
-        </div>
-
         <div className="travel-city-list">
           <div className="travel-map-key">
             <span><i className="travel-dot" data-listed="true" aria-hidden="true" />{labels.registered}</span>
@@ -96,6 +83,19 @@ export default function TravelDestinations({ locale, onBrowse }: {
               </li>;
             })}
           </ul>
+        </div>
+
+        <div className="travel-map" aria-hidden="true">
+          <img src={`/travel-map-${region}.webp`} width={1200} height={650} alt="" />
+          {Array.from(markers, ([key, { point: [longitude, latitude], listed }]) => (
+            <span key={key} className="travel-map-marker" data-listed={listed} style={{
+              left: `${(longitude - west) / (east - west) * 100}%`,
+              top: `${(north - latitude) / (north - south) * 100}%`,
+            }}>
+              {region === "japan" && key === destinations[1].point.join(",") &&
+                <span className="travel-map-label">{labels.tokyo}</span>}
+            </span>
+          ))}
         </div>
       </div>
     </section>

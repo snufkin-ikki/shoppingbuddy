@@ -7,17 +7,27 @@ export const respectFeeWithTax = (feeBeforeTax: number) => Math.round(feeBeforeT
 export const minimumRespectFee = respectFeeWithTax(minimumRespectFeeBeforeTax);
 
 export const categories = [
- {id:"衣",label:"ファッション",description:"古着・洋服・靴・小物",icon:"♧",color:"#ac553f"},
- {id:"美",label:"ビューティー",description:"コスメ・メイク・美容",icon:"✧",color:"#a94e79"},
- {id:"食",label:"フード",description:"食材・グルメ・手土産",icon:"♨",color:"#a86626"},
- {id:"住",label:"インテリア",description:"家具・雑貨・暮らし",icon:"⌂",color:"#42775d"},
- {id:"遊",label:"カルチャー",description:"本・音楽・趣味・サウナ",icon:"♫",color:"#366c9a"},
- {id:"電",label:"ガジェット",description:"家電・カメラ・デジタル",icon:"ϟ",color:"#7258a0"},
- {id:"和",label:"和文化",description:"着物・和雑貨・伝統工芸",icon:"◇",color:"#8b513d"},
- {id:"古",label:"ヴィンテージ",description:"古着・古道具・骨董",icon:"◈",color:"#71583d"}
+ {id:"衣",label:"ファッション",description:"古着・洋服・靴・小物",icon:"👕",color:"#ac553f"},
+ {id:"美",label:"ビューティー",description:"コスメ・メイク・美容",icon:"💄",color:"#a94e79"},
+ {id:"食",label:"フード",description:"食材・グルメ・手土産",icon:"🍴",color:"#a86626"},
+ {id:"住",label:"インテリア",description:"家具・雑貨・暮らし",icon:"🪑",color:"#42775d"},
+ {id:"遊",label:"カルチャー",description:"本・音楽・趣味・サウナ",icon:"🎵",color:"#366c9a"},
+ {id:"電",label:"ガジェット",description:"家電・カメラ・デジタル",icon:"📷",color:"#7258a0"},
+ {id:"和",label:"和文化",description:"着物・和雑貨・伝統工芸",icon:"👘",color:"#8b513d"},
+ {id:"古",label:"ヴィンテージ",description:"古着・古道具・骨董",icon:"📻",color:"#71583d"}
 ];
-export const areas = ["京都","代官山中目黒", "丸の内日比谷", "博多天神", "沖縄", "カンボジア", "豊洲", "築地", "足立市場", "秋葉原", "銀座", "二子玉川", "横浜", "銀座有楽町", "高円寺", "原宿表参道", "表参道", "新宿", "渋谷", "下北沢", "浅草", "梅田", "福岡天神", "名古屋栄", "京都河原町", "中目黒", "神保町", "祖師ヶ谷大蔵"];
+export const areas = ["岡山", "倉敷", "心斎橋", "心斎橋アメ村", "三宮", "滋賀竜王アウトレット", "福岡", "北九州", "下関", "池袋", "吉祥寺", "六本木", "町田", "京都","代官山中目黒", "丸の内日比谷", "博多天神", "沖縄", "カンボジア", "豊洲", "築地", "足立市場", "秋葉原", "銀座", "二子玉川", "横浜", "銀座有楽町", "高円寺", "原宿表参道", "表参道", "新宿", "渋谷", "下北沢", "浅草", "梅田", "福岡天神", "名古屋栄", "京都河原町", "中目黒", "神保町", "祖師ヶ谷大蔵"];
 export const profiles = [
+ {id:"motoki-fujikawa",categories:["衣","古"],name:"藤川 基（Motoki Fujikawa）",description:"五つ星ジーンズソムリエ",gender:"未設定",areas:["岡山","倉敷","梅田","心斎橋"],tags:["国産ジーンズ","ヴィンテージデニム","デニムの歴史"],fee:18182,image:"https://static.camp-fire.jp/uploads/user/profile_image/9168348/medium_IMG_2419.jpeg?auto=format&fit=max&ref=campfire",kind:"fujikawa",coverBadges:["五つ星ジーンズソムリエ","ジーンズ・ヘリテイジ・サミット発起人"] as const},
+ {id:"kotaro-shinada",categories:["衣","和","古"],name:"科田小太郎（KOTARO Shinada）",description:"クリエイティブディレクター／デザイナー",gender:"未設定",areas:["京都","梅田","心斎橋アメ村","三宮","滋賀竜王アウトレット"],tags:["セレクトショップ","古着物","アップサイクル","スニーカー","喫茶店"],fee:13000,image:"https://fashion-attendant.com/old/wp-content/uploads/2024/12/0395.jpg",kind:"shinada",coverBadges:["古着物のアップサイクル","Bookcafe DOOR掲載"] as const},
+ {id:"kenji-takahashi",categories:["衣","食","遊"],name:"タカハシケンジ（Kenji Takahashi）",description:"採用・広報パートナー／イベント企画",gender:"未設定",areas:["福岡","北九州","下関"],tags:["低身長コーデ","小さいサイズの服","福岡うどん","北九州の街歩き","イベント企画"],fee:6000,image:"/kenji-takahashi-cover.jpeg",kind:"takahashi",coverBadges:["北九州の街とローカルグルメ","きたきゅー雑談ラジオ"] as const},
+ {id:"yukio-coffee",categories:["衣"],name:"ゆっきー（yukio_coffee）",description:"SNSマーケター／フリーランスモデル",gender:"未設定",areas:["池袋","新宿","渋谷","原宿表参道","銀座有楽町"],tags:["大人カジュアル","低身長コーデ","ビジネスカジュアル","ユニクロ","無印良品","カフェ"],fee:15000,image:"/yukio-coffee-cover.png",kind:"yukio",coverBadges:["大人カジュアル・低身長コーデ","StyleHint 大人カジュアル賞"] as const},
+ {id:"kodai-yasuno",categories:["衣","古"],name:"安野広大（KODAI YASUNO）",description:"染色現代アーティスト／ファッションデザイナー",gender:"未設定",areas:["新宿","下北沢","原宿表参道"],tags:["染色","藍染","ろうけつ染め","絞り染め","古着","アップサイクル"],fee:20000,image:"/kodai-yasuno-cover.jpeg",kind:"yasuno",coverBadges:["染色現代アーティスト","BASE U掲載"] as const},
+ {id:"makoto-tokuda",categories:["衣","古"],name:"徳田真人（Makoto Tokuda）",description:"リユース業界の経営者",gender:"未設定",areas:["渋谷","原宿表参道","高円寺","銀座有楽町","新宿"],tags:["VANS","スニーカー","オールドスケート","ヴィンテージデニム","古着","靴づくり","リユースショップ"],fee:15000,image:"https://fashion-attendant.com/old/wp-content/uploads/2024/03/0383.jpg",kind:"tokuda",coverBadges:["リユース企業の経営経験","VANSとオールドスケート"] as const},
+ {id:"minoru-doi",categories:["衣","遊"],name:"土居充（Minoru Doi）",description:"デザイナー・プランナー",gender:"未設定",areas:["銀座有楽町","渋谷","表参道","新宿","池袋"],tags:["アパレル","Webデザイン","場のデザイン","地方創生","メタバース"],fee:8000,image:"https://fashion-attendant.com/old/wp-content/uploads/2025/11/0417.jpg",kind:"doi",coverBadges:["アパレル販売出身のデザイナー","NewsPicks掲載"] as const},
+ {id:"kohei-miyata",categories:["衣","遊"],name:"宮田浩平（Kohei Miyata）",description:"マーケター・モデル・ポールダンサー",gender:"未設定",areas:["新宿","渋谷","原宿表参道","表参道","銀座有楽町","池袋","吉祥寺"],tags:["ジェンダーレスファッション","ミニマルモード","古着","ポールダンス"],fee:8000,image:"/kohei-miyata-cover.jpeg",kind:"miyata",coverBadges:["ジェンダーレスな装い","SlowNews掲載"] as const},
+ {id:"kiyotaka-yamana",categories:["衣"],name:"山名清隆",description:"ソーシャルコンテンツプロデューサー",gender:"未設定",areas:["渋谷","表参道","二子玉川","新宿","銀座有楽町"],tags:["50代ファッション","60代ファッション","経営者ファッション","ユニクロ","ZARA","MARNI"],fee:15000,image:"https://fashion-attendant.com/old/wp-content/uploads/2026/05/0421-971x1024.jpg",kind:"yamana",coverBadges:["ミズベリングのプロデューサー","50代・60代のファッション"] as const},
+ {id:"keita-yanagawa",categories:["衣","古"],name:"柳川慶太（Keita Yanagawa）",description:"プロダクトマネージャー／元ITエンジニア",gender:"未設定",areas:["渋谷","原宿表参道","六本木","新宿","町田"],tags:["古着","ヴィンテージ","ミリタリー古着","色落ちTシャツ","リメイク古着"],fee:20000,image:"https://fashion-attendant.com/old/wp-content/uploads/2026/05/0422001-1024x1024.jpg",kind:"keita",coverBadges:["元エンジニアのPdM","PAY ID MAGAZINE掲載"] as const},
  {id:"akiko-kobayashi",categories:["和","古","衣"],name:"こばやしあきこ",description:"俳優",gender:"未設定",areas:["京都","銀座有楽町","渋谷"],tags:["着物","和装","リユース着物","俳優","英語対応可能"],fee:15000,image:"/akiko-kobayashi-kimono.jpeg",kind:"akiko",coverBadges:["『SHOGUN 将軍』出演・所作指導", "俳優・着物文化の発信"] as const},
  {id:"takashi-onizawa",categories:["住","衣","遊"],name:"鬼澤孝史",description:"インテリアコーディネーター",gender:"未設定",areas:[],tags:["インテリア","家具","バイク","クロムハーツ"],fee:30000,image:"/onizawa-portrait.jpeg",kind:"onizawa",coverBadges:["Instagram 1万人", "インテリアコーディネーター"] as const},
  {id:"satoshi-miya",categories:["遊","衣"],name:"宮 聡（Satoshi Miya）",description:"DJ・ダンサー／ヨガイベントプロデューサー",gender:"未設定",areas:["渋谷","代官山中目黒"],tags:["ダンス","DJ","レコード","ヨガ","アスレジャー"],fee:11000,image:"/miya-satoshi.jpg",kind:"miya",coverBadges:["ヨガと音楽をつなぐDJ", "ダンサー・ヨガイベント企画"] as const},
@@ -75,15 +85,59 @@ export function lowerPriceBuddies(source: BuddyProfile, area: string) {
 }
 
 export const mediaFeatures: Record<string, {title:string;publisher:string;date?:string;kind:string;url:string;image:string}[]> = {
+ "motoki-fujikawa": [
+   {title:"Japan Denim Days × MTKN｜限定セルビッジジーンズ",publisher:"Long John",kind:"メディア掲載",url:"https://long-john.nl/japan-denim-days-x-mtkn-limited-edition-selvedge-jeans/",image:""},
+   {title:"藤川 基さんの掲載ページ",publisher:"JBmag",kind:"関連リンク",url:"https://jbmag.com/fujikawa/",image:""},
+ ],
+ "kenji-takahashi": [
+   {title:"きたきゅー雑談ラジオ",publisher:"stand.fm",kind:"本人の音声配信",url:"https://stand.fm/channels/5f1cc553907968e29d7e672b",image:""},
+   {title:"タカハシケンジ「めいじん」というあだ名の採用担当",publisher:"note",kind:"本人の発信",url:"https://note.com/shiftgood",image:""},
+   {title:"高橋健二の流儀",publisher:"Bluebook",kind:"活動紹介",url:"https://bluebook.co.jp/kenji-takahashi",image:"https://bluebook.co.jp/wp-content/uploads/2019/10/%E9%AB%98%E6%A9%8B%E5%81%A5%E4%BA%8C%E3%83%95%E3%82%9A%E3%83%AD%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E7%94%BB%E5%83%8F.jpg"},
+   {title:"結婚しても転職、パパでも転職、40歳になっても転職",publisher:"ファザーリング・ジャパン九州",kind:"コラム",url:"https://fjq.jp/column/takahashi/takahshi012/",image:""},
+ ],
+ "yukio-coffee": [
+   {title:"ゆっきーのYouTubeチャンネル",publisher:"YouTube",kind:"本人の動画チャンネル",url:"https://www.youtube.com/@yukio_coffee",image:""},
+ ],
+ "kotaro-shinada": [
+   {title:"観察から始まるコミュニケーション",publisher:"Bookcafe DOOR",kind:"取材・インタビュー",url:"https://magazine.bookcafedoor.com/workshop/shinada/",image:""},
+   {title:"豊かに生きるために",publisher:"Bookcafe DOOR",kind:"取材・インタビュー",url:"https://magazine.bookcafedoor.com/root/kotaro/",image:"https://magazine.bookcafedoor.com/wp-content/uploads/2023/01/%E5%B0%8F%E5%A4%AA%E9%83%8E%E3%81%95%E3%82%93top.jpg"},
+ ],
+ "kodai-yasuno": [
+   {title:"ファッション産業の負を覆し、人を幸せに。使命に生きる“染色現代アーティスト”の独立秘話",publisher:"BASE U",kind:"取材・インタビュー",url:"https://baseu.jp/49070",image:"/kodai-yasuno-cover.jpeg"},
+   {title:"服に関わる人や地球の課題解決を。デザイナー安野広大に学ぶチャンスの掴み方",publisher:"U-29.com",kind:"取材・インタビュー",url:"https://u-29.com/2022/02/18/yasuno-kodai/",image:""},
+   {title:"ファッションを通して、関わる人を豊かにしたい",publisher:"エントリエマガジン",kind:"取材・インタビュー",url:"https://entrie.net/amy/027/",image:""},
+ ],
+ "makoto-tokuda": [
+   {title:"自社の強みは何なのか？アドバイザーのおかげで、現実的なマーケティング戦略を決めることができた",publisher:"ビザスク",kind:"取材・インタビュー",url:"https://visasq.co.jp/case/usednet",image:"https://visasq.co.jp/wp-content/uploads/2022/09/20220629011244-1024x768.jpeg"},
+   {title:"SDGsって何の略？ カードゲーム「2030SDGs」で学ぶ",publisher:"ニューアキンドセンター",kind:"メディア掲載",url:"https://new.akind.center/2030sdgs/",image:""},
+ ],
+ "minoru-doi": [
+   {title:"あらゆる距離を越境し、新しい取り組みを生み出す場のデザインとは",publisher:"NewsPicks",kind:"取材・インタビュー",url:"https://newspicks.com/news/13957029/body/",image:""},
+   {title:"都市部企業×地方で働く",publisher:"ながさき経済web",kind:"取材・インタビュー",url:"https://nagasaki-keizai.jp/other/topics/1686",image:""},
+ ],
+ "kohei-miyata": [
+   {title:"【記者×編集者×マーケター】メディア出身だからこそ強みが光るキャリア発展論",publisher:"SlowNews",date:"2025年6月6日",kind:"取材・インタビュー",url:"https://slownews.com/n/ndc70a7552690?gs=710beb298642b559240f470246923dff",image:"/kohei-miyata-cover.jpeg"},
+ ],
+ "kiyotaka-yamana": [
+   {title:"ユニークな時代を生きている幸せ",publisher:"キリンホールディングス",kind:"取材・インタビュー",url:"https://wb.kirinholdings.com/future/hint/20.html",image:""},
+   {title:"土木イベントの仕掛け人 山名清隆",publisher:"日経クロステック",kind:"取材・インタビュー",url:"https://xtech.nikkei.com/kn/article/const/column/20130812/628090/",image:""},
+   {title:"キャベツ畑の中心で妻に愛を叫ぶ　愛妻のムーブメント、広がる",publisher:"事業構想オンライン",kind:"取材・インタビュー",url:"https://www.projectdesign.jp/201702/workstyle/003391.php",image:""},
+   {title:"ミズベリング、日本愛妻家協会、東京カンパイ自動車道",publisher:"欲しかった暮らしラボ",kind:"取材・インタビュー",url:"https://www.hoshikatta-kurashi-lab.com/interview/779/",image:"https://www.hoshikatta-kurashi-lab.com/cms/wp-content/uploads/2019/06/s011-1200x780.jpg"},
+   {title:"ウィズコロナ下の「水辺で乾杯」",publisher:"日経BP",kind:"取材・インタビュー",url:"https://project.nikkeibp.co.jp/atclppp/PPP/434148/110500086/?ST=ppp-print",image:""},
+ ],
+ "keita-yanagawa": [
+   {title:"私が愛する、ヴィンテージ Vol.3",publisher:"PAY ID MAGAZINE",date:"2024年8月20日",kind:"取材・インタビュー",url:"https://payid-lp.studio.site/feature/vintage2408",image:""},
+   {title:"事業責任者と兼任するPMから学ぶ！ITエンジニア職からPMにキャリア形成するヒント",publisher:"Granty",date:"2024年11月4日",kind:"取材・インタビュー",url:"https://granty.me/interviews/pdm-voice-67",image:"https://img.granty.me/articles/pdm-voice-67.png"},
+ ],
  "akiko-kobayashi": [
    {title:"京女優・こばやしあきこさんのステキな夏コーデ",publisher:"きもの屋ゆめこもん",date:"2016年7月8日",kind:"着物コーディネート",url:"https://yumecomon.com/2016/07/12994/",image:""},
    {title:"『SHOGUN 将軍』の世界観を支えた所作指導",publisher:"きものと／京都きもの市場",kind:"取材・インタビュー",url:"https://www.kimonoichiba.com/media/column/1361/",image:""},
-   {title:"夢に手を挙げ続けて―京都から世界へ",publisher:"Vine Online／同志社女子大学",kind:"卒業生インタビュー",url:"https://www.vine-online.jp/article/line/17/",image:""},
+   {title:"夢に手を挙げ続けて―京都から世界へ",publisher:"Vine Online／同志社女子大学",kind:"卒業生インタビュー",url:"https://www.vine-online.jp/article/line/17/",image:"https://www.vine-online.jp/manager/wp-content/uploads/2026/04/article-line-2604-02.webp"},
    {title:"寄付講座「きもの学」｜着物の美と心を語る",publisher:"同志社女子大学",kind:"講座登壇のお知らせ",url:"https://www.dwc.doshisha.ac.jp/news/9812-shogunog",image:""},
  ],
  "takashi-onizawa": [
    {title:"インテリアコーディネーター 鬼澤孝史さん",publisher:"ケルヒャー",kind:"取材・インタビュー",url:"https://www.kaercher.com/jp/home-garden/karcher-magazine/lifestyle02.html",image:""},
-   {title:"鬼澤 孝史",publisher:"HUMAN STORY",kind:"取材・インタビュー",url:"https://humanstory.jp/onizawa_takashi/",image:""},
+   {title:"鬼澤 孝史",publisher:"HUMAN STORY",kind:"取材・インタビュー",url:"https://humanstory.jp/onizawa_takashi/",image:"https://humanstory.jp/wp/wp-content/uploads/2020/12/327_creative-design.jpg"},
  ],
  "satoshi-miya": [
    {title:"サーモマグのあるライフスタイル #thermomugpeople_16",publisher:"thermo mug",kind:"取材・インタビュー",url:"https://thermomug.com/blogs/feature/2019-0513",image:"/miya-satoshi.jpg"},

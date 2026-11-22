@@ -140,66 +140,68 @@ export default function BuddyUsageFlow({ locale }: { locale: SiteLanguage }) {
 
   return <section className="buddy-usage-flow" id="how-it-works" aria-labelledby="buddy-usage-title">
     <h2 id="buddy-usage-title">{content.heading}</h2>
-    <ol
-      className="buddy-usage-steps"
-      id="buddy-usage-steps"
-      ref={trackRef}
-      tabIndex={0}
-      aria-labelledby="buddy-usage-title"
-      onScroll={(event) => {
-        const { scrollLeft, clientWidth } = event.currentTarget;
-        if (clientWidth) setActiveStep(Math.max(0, Math.min(lastStep, Math.round(scrollLeft / clientWidth))));
-      }}
-      onKeyDown={(event) => {
-        const target = {
-          ArrowLeft: activeStep - 1,
-          ArrowRight: activeStep + 1,
-          Home: 0,
-          End: lastStep,
-        }[event.key];
-        if (target === undefined) return;
-        event.preventDefault();
-        goToStep(target);
-      }}
-    >
-      {content.steps.map(([title, description], index) => <li key={title}>
-        <div className="buddy-usage-pictogram" aria-hidden="true">
-          <svg viewBox="0 0 138 110" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" focusable="false">
-            {pictograms[index]}
-          </svg>
+    <div className="buddy-usage-details">
+      <ol
+        className="buddy-usage-steps"
+        id="buddy-usage-steps"
+        ref={trackRef}
+        tabIndex={0}
+        aria-labelledby="buddy-usage-title"
+        onScroll={(event) => {
+          const { scrollLeft, clientWidth } = event.currentTarget;
+          if (clientWidth) setActiveStep(Math.max(0, Math.min(lastStep, Math.round(scrollLeft / clientWidth))));
+        }}
+        onKeyDown={(event) => {
+          const target = {
+            ArrowLeft: activeStep - 1,
+            ArrowRight: activeStep + 1,
+            Home: 0,
+            End: lastStep,
+          }[event.key];
+          if (target === undefined) return;
+          event.preventDefault();
+          goToStep(target);
+        }}
+      >
+        {content.steps.map(([title, description], index) => <li key={title}>
+          <div className="buddy-usage-pictogram" aria-hidden="true">
+            <svg viewBox="0 0 138 110" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" focusable="false">
+              {pictograms[index]}
+            </svg>
+          </div>
+          <div className="buddy-usage-step-copy">
+            <h3><span aria-hidden="true">{index + 1}.</span> {title}</h3>
+            <p>{description}</p>
+          </div>
+        </li>)}
+      </ol>
+      <div className="buddy-usage-controls">
+        <button type="button" className="buddy-usage-arrow" aria-label={content.previous} aria-controls="buddy-usage-steps" disabled={activeStep === 0} onClick={() => goToStep(activeStep - 1)}>
+          <span aria-hidden="true">←</span>
+        </button>
+        <div className="buddy-usage-dots">
+          {content.steps.map(([title], index) => (
+            <button
+              key={title}
+              type="button"
+              aria-label={`${index + 1}. ${title}`}
+              aria-controls="buddy-usage-steps"
+              aria-current={activeStep === index ? "step" : undefined}
+              onClick={() => goToStep(index)}
+            />
+          ))}
         </div>
-        <div className="buddy-usage-step-copy">
-          <h3><span aria-hidden="true">{index + 1}.</span> {title}</h3>
-          <p>{description}</p>
-        </div>
-      </li>)}
-    </ol>
-    <div className="buddy-usage-controls">
-      <button type="button" className="buddy-usage-arrow" aria-label={content.previous} aria-controls="buddy-usage-steps" disabled={activeStep === 0} onClick={() => goToStep(activeStep - 1)}>
-        <span aria-hidden="true">←</span>
-      </button>
-      <div className="buddy-usage-dots">
-        {content.steps.map(([title], index) => (
-          <button
-            key={title}
-            type="button"
-            aria-label={`${index + 1}. ${title}`}
-            aria-controls="buddy-usage-steps"
-            aria-current={activeStep === index ? "step" : undefined}
-            onClick={() => goToStep(index)}
-          />
-        ))}
+        <button type="button" className="buddy-usage-arrow" aria-label={content.next} aria-controls="buddy-usage-steps" disabled={activeStep === lastStep} onClick={() => goToStep(activeStep + 1)}>
+          <span aria-hidden="true">→</span>
+        </button>
       </div>
-      <button type="button" className="buddy-usage-arrow" aria-label={content.next} aria-controls="buddy-usage-steps" disabled={activeStep === lastStep} onClick={() => goToStep(activeStep + 1)}>
-        <span aria-hidden="true">→</span>
-      </button>
-    </div>
-    <div className="buddy-usage-fee" hidden={activeStep !== paymentStep}>
-      <RespectFeeVideo locale={locale} />
-    </div>
-    <div className="buddy-usage-demo">
-      <p>{content.demo}</p>
-      <a href="#public-board">{content.action} <span aria-hidden="true">→</span></a>
+      <div className="buddy-usage-fee" hidden={activeStep !== paymentStep}>
+        <RespectFeeVideo locale={locale} />
+      </div>
+      <div className="buddy-usage-demo">
+        <p>{content.demo}</p>
+        <a href="#public-board">{content.action}</a>
+      </div>
     </div>
   </section>;
 }

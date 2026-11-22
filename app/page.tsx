@@ -1,5 +1,7 @@
 "use client";
 
+import { GenrePictogram, genreLabel } from "./genre-pictograms";
+import InterviewDiscovery from "./InterviewDiscovery";
 import TravelDestinations from "./TravelDestinations";
 import BuddyUsageFlow from "./BuddyUsageFlow";
 import ProfileShare from "./ProfileShare";
@@ -25,7 +27,6 @@ const buddyTerms = {
   zh: { passion: "这位伙伴的热爱", more: "查看更多兴趣", fee: "同行酬谢费", definition: "同行酬谢费是你与 Buddy 一起逛街的费用，款项支付给 Shopping Buddy。" },
 };
 
-const tags = ["古着", "カフェ", "雑貨", "デパート", "アウトレット", "ヴィンテージ", "スーツ", "ドレス", "セレクトショップ"];
 const buddies = [
   { id: 1, name: "あや", emoji: "👩🏻", interests: "古着・カフェ・音楽", walk: "徒歩2分", time: "15:20", color: "#ffe1cf" },
   { id: 2, name: "けんた", emoji: "👨🏻", interests: "雑貨・本・コーヒー", walk: "徒歩3分", time: "15:20", color: "#d8ecff" },
@@ -69,7 +70,7 @@ const requestFieldErrors = {
 };
 type RequestField = keyof typeof requestFieldErrors;
 const requestTimeLabel = "街歩きをしたい日時";
-const requestDeadlineLabel = "Buddyの応募を受け付ける期限";
+const requestDeadlineLabel = "応募受付期限";
 
 
 type RequestDetails = {
@@ -83,7 +84,17 @@ type RequestDetails = {
 
 const requestDraftKey = "shopping-buddy-request-draft-v1";
 const bookmarkStorageKey = "shopping-buddy-bookmarks-v1";
-const requestMinutes = { "1時間": 60, "1時間30分": 90, "2時間": 120, "2時間30分": 150, "3時間": 180 };
+const minRequestMinutes = 60;
+const maxRequestMinutes = 12 * 60;
+const requestStepMinutes = 30;
+const requestMinutes = Object.fromEntries(
+  Array.from({ length: (maxRequestMinutes - minRequestMinutes) / requestStepMinutes + 1 }, (_, index) => {
+    const minutes = minRequestMinutes + index * requestStepMinutes;
+    const hours = Math.floor(minutes / 60);
+    const remainder = minutes % 60;
+    return [`${hours}時間${remainder ? `${remainder}分` : ""}`, minutes];
+  }),
+);
 const requestDefaults = { title: "", area: "下北沢", when: "今すぐ", dateTime: "", duration: "1時間", deadline: "24時間" };
 
 const directoryExtras = {
@@ -175,7 +186,48 @@ const instagramAccounts: Partial<Record<string, string>> = {
   "takashi-onizawa": "creativedesign",
   "akiko-kobayashi": "kobayashi_akiko.official",
 };
-const englishSpeakingBuddies = new Set(["ucci", "akiko-kobayashi"]);
+const attendantProfiles: Record<string, { bio: string; instagram?: string; languages?: string }> = {
+  "keita-yanagawa": {
+    bio: "ミリタリー古着や色落ちしたTシャツ、リメイクされたヴィンテージが好き。服の背景や、サイズ・色の組み合わせを話しながら街を歩けます。",
+    instagram: "yanagirv",
+  },
+  "kohei-miyata": {
+    bio: "記者・編集者を経てマーケターに。モデルやポールダンサーとしても活動し、ジェンダーレスでミニマルな装いや、モードとストリートを合わせたスタイルを好みます。",
+    instagram: "kyoko_miyae",
+    languages: "日本語 / English / Deutsch",
+  },
+  "kenji-takahashi": {
+    bio: "関東での暮らしを経て北九州へUターン。アパレル販売の経験を活かした小さいサイズの服選びや、福岡のうどん店、地元の街歩きについて話せます。",
+    languages: "日本語 / English（英語での同行も相談可）",
+  },
+  "yukio-coffee": {
+    bio: "ユニクロや無印良品を軸に、セレクトショップの服も取り入れた大人カジュアルを発信。低身長コーデや、手持ちの服にも合わせやすい着こなしが得意です。",
+    instagram: "yukio_coffee",
+  },
+  "motoki-fujikawa": {
+    bio: "五つ星ジーンズソムリエ。国産ジーンズやヴィンテージデニムの歴史、縫製や仕様の違いを探求し、その魅力を国内外に発信しています。ジーンズ・ヘリテイジ・サミットの発起人です。",
+    instagram: "mtk0058",
+  },
+  "kotaro-shinada": {
+    bio: "アパレルの商品企画やバイイングを経て、ブランドや商品開発のディレクションに携わる。古着物を生かすアップサイクルブランドにも関わり、京都のセレクトショップや喫茶店が好きです。",
+    instagram: "kotaroshinada",
+  },
+  "kodai-yasuno": {
+    bio: "一点ものの染色アパレルブランド「KODAI YASUNO」を展開。藍染や絞り染めなどの技法を用い、服に新たな表情を加えています。",
+  },
+  "makoto-tokuda": {
+    bio: "VANSやオールドスケート、ヴィンテージデニムが好き。靴のデザインと制作を学び、古着とストリートを組み合わせるスタイルや、リユースショップでのアイテム選びを得意としています。",
+  },
+  "minoru-doi": {
+    bio: "アパレル販売、エンジニア、Webデザイナーを経て、企画や事業づくりに携わる。長崎では、地元企業と都市部の企業をつなぐ「おさかなサブスク」に取り組みました。",
+    instagram: "doidoi3000",
+  },
+  "kiyotaka-yamana": {
+    bio: "「ミズベリング」などを手がけるプロデューサー。ユニクロやZARAなど身近なブランドを活かした、清潔感と遊び心のある大人の装いが得意です。",
+    instagram: "kiyotaka_yamana",
+  },
+};
+const englishSpeakingBuddies = new Set(["ucci", "akiko-kobayashi", "kohei-miyata", "kenji-takahashi"]);
 const takaraVideo = "https://youtu.be/Zs380a4MRvA";
 
 const ayanoFeedTopics = ["スマートフォン", "展示会のひとこま", "スマホ撮影", "端末レビュー", "カメラ付きスマホ", "海外イベント", "ポータブルゲーム", "カメラ", "モビリティ", "ロボット", "スマートフォン", "薄型端末"];
@@ -224,9 +276,9 @@ export default function Home() {
   useEffect(()=>{const saved=localStorage.getItem("shopping-buddy-locale");if(saved==="en"||saved==="zh")setLocale(saved);},[]);
   useEffect(()=>{localStorage.setItem("shopping-buddy-locale",locale);document.documentElement.lang=locale;},[locale]);
   const copy = {
-    ja:{location:"下北沢駅周辺⌄",heroEyebrow:"SHOPPING BUDDY / NEAR YOU",heroTop:"今から1時間、",heroBottom:"街を歩こう。",heroLead:"古着、本、喫茶店。好きなことへの「偏愛」を持つクリエイターと、街歩きやウインドウショッピングを楽しもう。",purchaseNote:"見るだけでもOK。買い物は必須ではありません。",interests:"好きなこと・偏愛から探す",directoryTitle:"どの街で、誰と歩く？",directoryLead:"クリエイターそれぞれの偏愛から、気が合いそうな街歩きの相方を探そう。",genreTitle:"好きなジャンルから探す",allGenres:"すべてのジャンル",keyword:"名前・好きなこと",keywordPlaceholder:"古着、本、サウナ、名前など",city:"都市・エリア",allAreas:"すべてのエリア",gender:"性別",allGenders:"すべての性別",filterNote:"エリアは登録済みタグをもとに表示しています。実際の対応場所・日時は要確認です。",results:"人のバディ",clear:"条件をクリア",sort:"並び順",registered:"登録順",newest:"新着順",priceSort:"リスペクトフィーが低い順",profilePrice:"プロフィールを見る →",back:"← 一覧に戻る"},
-    en:{location:"Near Shimokitazawa Station⌄",heroEyebrow:"SHOPPING BUDDY / NEAR YOU",heroTop:"Take an hour,",heroBottom:"walk the neighborhood.",heroLead:"Vintage, books, cafés. Walk and window-shop with a creator who loves what you love.",purchaseNote:"Browsing is welcome. You can enjoy the walk without buying anything.",interests:"Explore by interest",directoryTitle:"Where would you like to walk?",directoryLead:"Find a companion by neighborhood and interests.",genreTitle:"Start with a category you love.",allGenres:"All categories",keyword:"Name or interests",keywordPlaceholder:"Vintage, books, sauna, a name…",city:"City / neighborhood",allAreas:"All areas",gender:"Gender",allGenders:"Any gender",filterNote:"Areas are based on registered profile tags. Please confirm availability and meeting details.",results:" buddies",clear:"Clear filters",sort:"Sort by",registered:"Registration order",newest:"Newest",priceSort:"Lowest respect fee",profilePrice:"Profile & rates →",back:"← Back to directory"},
-    zh:{location:"下北泽站附近⌄",heroEyebrow:"SHOPPING BUDDY / 附近",heroTop:"留出一小时，",heroBottom:"逛逛这座城市。",heroLead:"古着、书籍、咖啡馆。和热爱这些事物的创作者一起漫步、逛街。",purchaseNote:"只逛逛也欢迎，购买商品由您决定。",interests:"按兴趣探索",directoryTitle:"想和谁逛哪条街？",directoryLead:"按区域和兴趣寻找你的城市同伴。",genreTitle:"先从喜欢的类别开始。",allGenres:"全部类别",keyword:"姓名或兴趣",keywordPlaceholder:"古着、书籍、桑拿或姓名…",city:"城市 / 区域",allAreas:"所有区域",gender:"性别",allGenders:"不限性别",filterNote:"区域依据个人资料中登记的标签显示。集合地点和时间请另行确认。",results:"位同伴",clear:"清除筛选",sort:"排序",registered:"登记顺序",newest:"最新登记",priceSort:"按同行酬谢费从低到高",profilePrice:"查看资料与费用 →",back:"← 返回列表"}
+    ja:{location:"下北沢駅周辺⌄",heroEyebrow:"SHOPPING BUDDY",heroTop:"その偏愛と、",heroBottom:"街を歩こう。",heroLead:"下北沢の古着屋を店主とめぐる。神保町の路地を書店に詳しい人と歩く。街やカルチャーに「偏愛」を持つ相方と、街歩きやウインドウショッピングを楽しむサービスです。",purchaseNote:"見るだけでもOK。買い物は必須ではありません。",interests:"好きなこと・偏愛から探す",directoryTitle:"どの街で、誰と歩く？",directoryLead:"クリエイターそれぞれの偏愛から、気が合いそうな街歩きの相方を探そう。",genreTitle:"好きなジャンルから探す",allGenres:"すべてのジャンル",keyword:"名前・好きなこと",keywordPlaceholder:"古着、本、サウナ、名前など",city:"都市・エリア",allAreas:"すべてのエリア",gender:"性別",allGenders:"すべての性別",filterNote:"エリアは登録済みタグをもとに表示しています。実際の対応場所・日時は要確認です。",results:"人のバディ",clear:"条件をクリア",sort:"並び順",registered:"登録順",newest:"新着順",priceSort:"リスペクトフィーが低い順",profilePrice:"プロフィールを見る →",back:"← 一覧に戻る"},
+    en:{location:"Near Shimokitazawa Station⌄",heroEyebrow:"SHOPPING BUDDY",heroTop:"Take an hour,",heroBottom:"walk the neighborhood.",heroLead:"Vintage, books, cafés. Walk and window-shop with a creator who loves what you love.",purchaseNote:"Browsing is welcome. You can enjoy the walk without buying anything.",interests:"Explore by interest",directoryTitle:"Where would you like to walk?",directoryLead:"Find a companion by neighborhood and interests.",genreTitle:"Start with a category you love.",allGenres:"All categories",keyword:"Name or interests",keywordPlaceholder:"Vintage, books, sauna, a name…",city:"City / neighborhood",allAreas:"All areas",gender:"Gender",allGenders:"Any gender",filterNote:"Areas are based on registered profile tags. Please confirm availability and meeting details.",results:" buddies",clear:"Clear filters",sort:"Sort by",registered:"Registration order",newest:"Newest",priceSort:"Lowest respect fee",profilePrice:"Profile & rates →",back:"← Back to directory"},
+    zh:{location:"下北泽站附近⌄",heroEyebrow:"SHOPPING BUDDY",heroTop:"留出一小时，",heroBottom:"逛逛这座城市。",heroLead:"古着、书籍、咖啡馆。和热爱这些事物的创作者一起漫步、逛街。",purchaseNote:"只逛逛也欢迎，购买商品由您决定。",interests:"按兴趣探索",directoryTitle:"想和谁逛哪条街？",directoryLead:"按区域和兴趣寻找你的城市同伴。",genreTitle:"先从喜欢的类别开始。",allGenres:"全部类别",keyword:"姓名或兴趣",keywordPlaceholder:"古着、书籍、桑拿或姓名…",city:"城市 / 区域",allAreas:"所有区域",gender:"性别",allGenders:"不限性别",filterNote:"区域依据个人资料中登记的标签显示。集合地点和时间请另行确认。",results:"位同伴",clear:"清除筛选",sort:"排序",registered:"登记顺序",newest:"最新登记",priceSort:"按同行酬谢费从低到高",profilePrice:"查看资料与费用 →",back:"← 返回列表"}
   }[locale];
   const [query,setQuery] = useState("");
   const [area,setArea] = useState("");
@@ -377,9 +429,11 @@ export default function Home() {
     .slice(0, 3) : [];
 
   function browseTravelArea(destination: string) {
+    setProfileView(null);
     resetFilters();
     setArea(destination);
-    focusBuddyResults();
+    history.pushState(null, "", "#buddy-search-results");
+    requestAnimationFrame(focusBuddyResults);
   }
 
   function resetFilters(){setCategory("");setQuery("");setArea("");setGender("");setAge("");setOccupation("");setSavedOnly(false);setPage(1);}
@@ -581,7 +635,6 @@ export default function Home() {
     </>;
   }
 
-  const [selectedTags, setSelectedTags] = useState<string[]>(["古着", "カフェ"]);
   const [activeBuddy, setActiveBuddy] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<string[]>(["こんにちは！駅前の古着屋から歩きませんか？"]);
@@ -727,9 +780,9 @@ export default function Home() {
   const buddy = useMemo(() => buddies.find((item) => item.id === activeBuddy), [activeBuddy]);
 
   const requestOptions = {
-    ja: { offer: "登録Buddyにオファーを出す", offerNote: "プロフィールを見て相方を選ぶ。マッチ成立後はチャットで相談。オファー送信は準備中です。", recruit: "日時を決めて相方を募る", recruitNote: "行きたい街と時間を書いて、募集から待ち合わせまでをデモで試せます。", line: "見つかったらLINEで教えて！", lineNote: "ピンとくるBuddyがいなければ、希望の街・相方・予算を運営に伝えられます。" },
-    en: { offer: "Send an offer to a registered Buddy", offerNote: "Browse profiles. Chat starts after matching. Offer sending is coming soon.", recruit: "Try posting a walk request", recruitNote: "Choose an area and time, then try the demo from posting to meeting up.", line: "Let me know on LINE", lineNote: "Still looking? Tell our team where you want to go, who you’d like to walk with, and your budget." },
-    zh: { offer: "向已注册的 Buddy 发出邀请", offerNote: "浏览个人资料并选择伙伴。匹配后开始聊天。邀请发送功能尚未开放。", recruit: "指定时间，发布同行需求", recruitNote: "填写地点和时间，体验从发布需求到会合的演示。", line: "找到后通过 LINE 通知我", lineNote: "还没找到合适的伙伴？告诉运营团队你想去的街区、想找的伙伴和预算。" },
+    ja: { offer: "街歩きの相方を探す", offerNote: "得意な街・好きなこと・同行料金を見比べられます。", recruit: "相方を募集する（デモ）", recruitNote: "行きたい街と時間を書いて、募集から待ち合わせまでをデモで試せます。", line: "見つかったらLINEで教えて！", lineNote: "ピンとくるBuddyがいなければ、希望の街・相方・予算を運営に伝えられます。" },
+    en: { offer: "Explore Buddy profiles", offerNote: "Compare neighborhoods, interests, and rates.", recruit: "Try posting a walk request", recruitNote: "Choose an area and time, then try the demo from posting to meeting up.", line: "Let me know on LINE", lineNote: "Still looking? Tell our team where you want to go, who you’d like to walk with, and your budget." },
+    zh: { offer: "浏览同行伙伴", offerNote: "比较熟悉的街区、兴趣和陪同费用。", recruit: "体验发布同行需求（演示）", recruitNote: "填写地点和时间，体验从发布需求到会合的演示。", line: "找到后通过 LINE 通知我", lineNote: "还没找到合适的伙伴？告诉运营团队你想去的街区、想找的伙伴和预算。" },
   }[locale];
 
   const pageResults = results.slice((page - 1) * 12, page * 12);
@@ -743,7 +796,7 @@ export default function Home() {
   const selectedDemoProfile = publicRequest?.selected
     ? profiles.find(profile => `${profile.name}（応募デモ）` === publicRequest.selected)
     : undefined;
-  const demoDuration = publicRequest ? requestMinutes[publicRequest.duration as keyof typeof requestMinutes] : undefined;
+  const demoDuration = publicRequest ? requestMinutes[publicRequest.duration] : undefined;
   const demoFee = selectedDemoProfile && demoDuration ? respectFeeWithTax(selectedDemoProfile.fee * (demoDuration / 60)) : null;
   const resumeWalk = publicRequest?.selected
     ? ({
@@ -757,9 +810,6 @@ export default function Home() {
     } satisfies Record<WalkStage, [string, string]>)[walkStage]
     : [publicRequest?.applicants.length ? "応募を見る" : "募集内容を見る", publicRequest?.applicants.length ? "request-applicants" : "request-live-title"];
 
-  function toggleTag(tag: string) {
-    setSelectedTags((current) => current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag]);
-  }
 
   function chooseBuddy(id: number) {
     setActiveBuddy(id);
@@ -776,22 +826,43 @@ export default function Home() {
       <header className="site-header">
         <a className="logo" href="#top" aria-label="Shopping Buddy トップ"><img src="/shopping-buddy-logo-final.png" alt="Shopping Buddy — FREE TIME? FIND A「WINDOW / SHOPPING」PARTNER!" width="300" height="54" /></a>
         <nav className="top-actions" aria-label="メインナビゲーション">
-          <button className="location-pill"><span className="blue-dot" />{copy.location}</button>
           <label className="language-control"><span className="sr-only">Language</span><select aria-label="Language" value={locale} onChange={e=>changeLanguage(e.target.value)}><option value="ja">日本語</option><option value="en">English</option><option value="zh">中文</option></select></label>
           {publicRequest?.selected && <button className="walk-header-link" type="button"
             onClick={() => focusRequestSection("today-walk-title")}>
             {{ ja: "今日の街歩き", en: "My walk", zh: "我的街区漫步" }[locale]}
           </button>}
-          <button className="avatar-button" aria-label="プロフィール">IK⌄</button>
         </nav>
       </header>
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <p className="eyebrow">{copy.heroEyebrow}</p>
-          <h1><span className="headline-line">{copy.heroTop}</span><span className="headline-line">{copy.heroBottom}</span></h1>
           <p className="lead">{copy.heroLead}</p>
-          <div className="current-location"><span className="pin">●</span><span className="live-dot" />下北沢駅周辺</div>
+        </div>
+        <div className="visual-panel">
+          <img src="/urban-hero.png" alt="古着店やカフェが並ぶ街を歩く人々" />
+          <div className="photo-title">
+          <h1><span className="headline-line">{copy.heroTop}</span><span className="headline-line">{copy.heroBottom}</span></h1>
+          </div>
+          <span className="coral-sticker">{{ja:"気軽にまち歩き",en:"Take a walk",zh:"轻松逛街"}[locale]}</span>
+        </div>
+
+          <section className="passion-picker" aria-labelledby="passion-title">
+            <h2 id="passion-title">{{ja:<><span>好き</span>なジャンルから探す</>, en:<>Explore by <span>passion</span></>, zh:<>从<span>兴趣</span>类别寻找伙伴</>}[locale]}</h2>
+            <div className="passion-grid">{categories.map(c => (
+              <button type="button" key={c.id} data-genre={c.id} aria-pressed={category === c.id} onClick={() => {
+                setProfileView(null);
+                resetFilters();
+                setCategory(c.id);
+                history.pushState(null, "", "#buddy-search-results");
+                requestAnimationFrame(focusBuddyResults);
+              }}>
+                <span className="passion-symbol">{c.id}</span><GenrePictogram id={c.id} />
+                <strong>{genreLabel(c.id, c.label, locale)}</strong>
+              </button>
+            ))}</div>
+          </section>
+        <div className="walk-entry-actions">
+          <p className="visitor-note">{{ ja: "現在はプロフィールを公開中。同行の予約・決済は準備中です。", en: "Profiles are open to browse. Booking and payment are coming soon.", zh: "现可浏览伙伴资料，预约与支付功能正在准备中。" }[locale]}</p>
           <div className="hero-actions">
             <div className="hero-request-options" id="buddy-request-options">
               <a className="hero-request-option is-primary" href="#directory">
@@ -805,147 +876,19 @@ export default function Home() {
             </div>
             <div className="hero-user-links">
               <a className="hero-recruit-link" href="#travel-destinations">
-                {{ ja: "旅先の街を見る", en: "Explore destinations", zh: "查看旅行目的地" }[locale]} <span aria-hidden="true">↓</span>
+                {{ ja: "街からBuddyを探す", en: "Find a Buddy by city", zh: "按城市寻找伙伴" }[locale]} <span aria-hidden="true">↓</span>
               </a>
               <a className="hero-recruit-link" href="#how-it-works">
                 {{ ja: "ご利用の流れ", en: "How it works", zh: "使用流程" }[locale]} <span aria-hidden="true">↓</span>
               </a>
             </div>
-            <a className="hero-buddy-application" href="https://shopping-buddy-recruitment.ikkiyokoji.chatgpt.site/" hrefLang="ja">
-              {{ ja: "Buddyとして参加する", en: "Apply to become a Buddy", zh: "申请成为同行伙伴" }[locale]}
-              <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-          <div className="interest-block">
-            <p>{copy.interests}</p>
-            <div className="tags">
-              {tags.map((tag) => <button key={tag} onClick={() => toggleTag(tag)} className={selectedTags.includes(tag) ? "selected" : ""}>#{tag}</button>)}
-            </div>
+
           </div>
         </div>
-
-        <div className="visual-panel">
-          <img src="/urban-hero.png" alt="古着店やカフェが並ぶ街を歩く人々" />
-          <div className="coral-sticker">気軽に<br />まち歩き</div>
-          <div className="blue-slice" />
-        </div>
-
-        <div className="nearby directory-jump"><strong>好きな街、好きなことから。</strong><a href="#directory">登録バディを見る →</a></div>
       </section>
 
       <TravelDestinations locale={locale} onBrowse={browseTravelArea} />
-
       <BuddyUsageFlow locale={locale} />
-
-      {publicRequest && <section className="request-options walk-resume" aria-label="進行中の街歩きデモ">
-        <div><p className="request-step">進行中の街歩き · デモ</p><h2>{publicRequest.area} · {publicRequest.duration}</h2><p>{publicRequest.title}</p></div>
-        <button type="button" className="request-apply" onClick={() => focusRequestSection(resumeWalk[1])}>{resumeWalk[0]} →</button>
-      </section>}
-
-      <section className="public-board" id="public-board" aria-labelledby="public-board-title">
-        <div className="public-board-heading"><div><p className="eyebrow">OPEN CALL / FIND A COMPANION</p><h2 id="public-board-title" tabIndex={-1}>同行してほしいBuddyを募る</h2><p>こちらはリスペクトフィーを支払って同行を依頼する利用者さん向けの募集です。行きたい街と希望を公開し、応募したBuddyから1人を選びます。</p></div><span className="public-board-stamp">公開募集<br/>BETA</span></div>
-        {!publicRequest ? <div className="request-compose">
-          <div className="request-compose-copy"><span className="request-step">01 / 利用者として募集する</span><h3>「ウインドウショッピング・街歩きに付き合ってほしい」を募集</h3><p>購入は不要です。お店をのぞいたり、街を歩くだけでも楽しめます。</p><p className="request-role-note"><strong>募集するあなた：Shopping Buddyにリスペクトフィーを支払う利用者</strong><br/>応募するBuddy：同行し、サービスを通じて報酬を受け取る登録クリエイター</p><p>応募したBuddyのプロフィールとリスペクトフィーを確認し、期限までに1人を選び、Shopping Buddyに支払います。利用者のプロフィールとエリアを公開し、具体的な待ち合わせ場所はマッチ後に共有します。</p><p>応募するBuddyには本人確認が必要です。</p></div>
-          {requestReview ? <section className="request-review" aria-labelledby="request-review-title">
-            <p className="request-step">公開前の確認</p>
-            <h3 id="request-review-title" tabIndex={-1}>募集内容を確認する</h3>
-            <dl>
-              <div><dt>Buddyにお願いしたいこと</dt><dd>{requestReview.title}</dd></div>
-              <div><dt>エリア</dt><dd>{requestReview.area}</dd></div>
-              <div><dt>{requestTimeLabel}</dt><dd>{requestReview.when}</dd></div>
-              <div><dt>所要時間</dt><dd>{requestReview.duration}</dd></div>
-              <div><dt>{requestDeadlineLabel}</dt><dd>{requestReview.deadline}</dd></div>
-            </dl>
-            <p className="request-review-note">実際の募集では、依頼者プロフィールと上記の募集内容が公開されます。詳しい待ち合わせ場所はマッチ後のチャットで共有します。</p>
-            <button className="request-publish" type="button" onClick={() => {
-              const id = crypto.randomUUID();
-              const entrySource = currentVintageSource();
-              setPublicRequest({ ...requestReview, id, applicants: [], selected: null, owner: "あなた", entrySource });
-              recordDemo(id, "posted", entrySource);
-              setRequestReview(null);
-              focusRequestSection("request-live-title");
-            }}>デモで募集を表示する <span aria-hidden="true">→</span></button>
-            <button className="request-edit" type="button" onClick={() => {
-              setRequestReview(null);
-              focusRequestSection("request-title");
-            }}>入力内容を修正する</button>
-          </section> : <form className="request-form" onSubmit={reviewRequest} noValidate>
-            {requestSearchNote && <p className="request-search-note" role="status">{requestSearchNote}</p>}
-            <p className="request-draft-note">入力内容はこのタブに下書きとして残ります。</p>
-            <div className="request-examples">
-              <strong>希望を選んで下書きする</strong>
-              {requestTitle.trim() ? <small>入力した文章は下で編集できます。</small> : <div>
-                {[...requestPreferences, ...requestExamples].map(example => <button key={example.label} type="button" onClick={() => {
-                  setRequestTitle(example.title);
-                  clearRequestError("request-title");
-                  focusRequestSection("request-title");
-                }}>{example.label}</button>)}
-              </div>}
-            </div>
-            <div>
-              <label>Buddyにお願いしたいこと<input id="request-title" value={requestTitle}
-                onChange={event => { setRequestTitle(event.target.value); clearRequestError("request-title"); }}
-                placeholder="例：下北沢の古着屋巡りに、詳しいBuddyに付き合ってほしい" maxLength={70}
-                required {...titleFeedback.props} /></label>
-              {titleFeedback.message}
-            </div>
-            <div className="request-form-row">
-              <div>
-                <label>エリア<select id="request-area" value={requestArea}
-                  onChange={event => { setRequestArea(event.target.value); clearRequestError("request-area"); }}
-                  required {...areaFeedback.props}>
-                  <option value="" disabled>エリアを選ぶ</option>
-                  {launchAreas.map(place => <option key={place}>{place}</option>)}
-                </select></label>
-                {areaFeedback.message}
-              </div>
-              <label>{requestTimeLabel}<select id="request-when" value={requestWhen}
-                onChange={event => { setRequestWhen(event.target.value); clearRequestError("request-datetime"); }}>
-                <option>今すぐ</option><option>今日の午後</option><option>日時を指定</option>
-              </select></label>
-            </div>
-            <details className="inline-help"><summary>日時はいつ確定する？</summary><p>ここで入力するのは希望日時です。マッチ成立後、Buddyと相談して待ち合わせを確定します。</p></details>
-            {requestWhen === "日時を指定" && <div>
-              <label>日付と時刻<input id="request-datetime" type="datetime-local" required value={requestDateTime}
-                onChange={event => { setRequestDateTime(event.target.value); clearRequestError("request-datetime"); }}
-                {...dateFeedback.props} /></label>
-              {dateFeedback.message}
-            </div>}
-            <div className="request-form-row">
-              <label>所要時間<select value={requestDuration} onChange={event => setRequestDuration(event.target.value)}>
-                {Object.keys(requestMinutes).map(duration => <option key={duration}>{duration}</option>)}
-              </select></label>
-              <label>{requestDeadlineLabel}<select value={requestDeadline} onChange={event => setRequestDeadline(event.target.value)}>
-                <option>1時間</option><option>6時間</option><option>24時間</option><option>48時間</option>
-              </select></label>
-            </div>
-            <button className="request-publish" type="submit">募集内容を確認する <span aria-hidden="true">→</span></button>
-            <button className="request-edit" type="button" onClick={clearRequestDraft}>下書きを消す</button>
-          </form>}
-        </div> : <div className="request-live">
-          <div className="request-live-main"><span className={`request-status ${publicRequest.selected ? "is-selected" : ""}`}>{publicRequest.selected ? "Buddy決定" : "応募受付中"}</span><h3 id="request-live-title" tabIndex={-1}>{publicRequest.title}</h3><div className="request-owner-profile"><span className="request-owner-avatar">IK</span><span><strong>利用者（依頼者）のプロフィール</strong><small>表示名・プロフィールを応募前に確認できます</small></span></div><div className="request-meta"><span>📍 {publicRequest.area}</span><span>◷ {publicRequest.when} · {publicRequest.duration}</span><span>締切 {publicRequest.deadline}</span></div><p className="location-privacy-note">具体的な待ち合わせ場所は、マッチ成立後にチャットで共有します。</p><p>{publicRequest.selected ? `${publicRequest.selected}さんに決まりました。街歩きの条件を確認しましょう。` : `応募 ${publicRequest.applicants.length}人 · 締切まで応募を受け付けます。`}</p>
-            {!publicRequest.selected && <div className="request-actions">
-              <button className="request-apply" type="button" disabled={publicRequest.applicants.length > 0} onClick={() => {
-                const sample = profiles.find(profile => profile.areas.some(place => place === publicRequest.area || requestAreaAliases[place] === publicRequest.area));
-                setPublicRequest({ ...publicRequest, applicants: [sample ? `${sample.name}（応募デモ）` : "サンプルBuddy"] });
-                recordDemo(publicRequest.id, "applied", publicRequest.entrySource);
-              }}>{publicRequest.applicants.length ? "応募サンプルを追加済み" : "デモ：Buddyからの応募を表示"}</button>
-              {!publicRequest.applicants.length && <button className="request-edit" type="button" onClick={() => {
-                setPublicRequest(null);
-                setRequestSearchNote("募集内容を引き継ぎました。時間を変更して、もう一度試せます。");
-                focusRequestSection("request-when");
-              }}>時間を変えて募集を試す</button>}
-              <small>プロフィールを使った操作例です。本人に応募や通知は発生しません。</small>
-            </div>}
-          </div>
-          <div className="applicant-panel"><span className="request-step">02 / プロフィール・リスペクトフィーを確認して選ぶ</span><h4 id="request-applicants" tabIndex={-1}>応募したBuddy <b>{publicRequest.applicants.length}</b></h4>{publicRequest.applicants.length ? <ul>{publicRequest.applicants.map(name=><li key={name}><span className="applicant-avatar">{name.startsWith("Buddy") ? "B" : name.slice(0,1)}</span><span><strong>{name}</strong><small>応募サンプル · {publicRequest.duration}のリスペクトフィーを確認</small></span>{publicRequest.selected ? <b className="chosen-label">{publicRequest.selected===name?"選択済み":"受付終了"}</b> : <button onClick={() => { setWalkStage("matched"); setPublicRequest({ ...publicRequest, selected: name }); recordDemo(publicRequest.id, "matched", publicRequest.entrySource); focusRequestSection("today-walk-title"); }}>この人を選ぶ</button>}</li>)}</ul> : <p className="no-applicants">応募が届くとここに表示されます。<br/>応募者のプロフィールとリスペクトフィーを確認して1人を選べます。</p>}</div>
-          {publicRequest.selected && <TodayWalk key={publicRequest.id} buddy={selectedDemoProfile?.name ?? publicRequest.selected} suggestedFee={demoFee} area={publicRequest.area}
-            when={publicRequest.when} duration={publicRequest.duration} stage={walkStage} setStage={setWalkStage}
-            onMeet={() => recordDemo(publicRequest.id, "met", publicRequest.entrySource)} />}
-          <button className="request-cancel" onClick={()=>{setPublicRequest(null);clearRequestDraft();}}>募集を終了して新しく作る</button>
-        </div>}
-        <p className="public-board-footnote">※ この画面は機能イメージのプレビューです。募集・応募・決済はまだ実際には送信されません。</p>
-      </section>
 
       <section className="directory" id="directory" aria-labelledby="directory-title">
         <p className="eyebrow">{detail ? "BUDDY PROFILE" : "FIND YOUR BUDDY"}</p><h2 id="directory-title" tabIndex={-1}>{detail ? (locale==="ja"?"バディのプロフィール":locale==="en"?"Buddy profile":"同伴者资料") : copy.directoryTitle}</h2>
@@ -965,11 +908,9 @@ export default function Home() {
           </div>
           <a className="vintage-entry-link" href={vintageEntryPath}>下北沢の古着屋めぐり特集を見る →</a>
         </div>
-        <div className="genre-heading"><div><span className="eyebrow">{categories.length} GENRES</span><h3>{copy.genreTitle}</h3></div><button aria-pressed={!category} onClick={()=>{setCategory("");setPage(1);}}>{copy.allGenres}</button></div>
-        <div className="genre-grid" aria-label="大カテゴリーで絞り込む">{categories.map(c=><button key={c.id} className="genre-card" aria-pressed={category===c.id} style={{"--genre-color":c.color} as React.CSSProperties} onClick={()=>{setCategory(category===c.id?"":c.id);setPage(1);}}>
-          <span className="genre-top"><span className="genre-character">{c.id}</span><span className="genre-icon" aria-hidden="true">{c.icon}</span></span><strong>{c.label}</strong><small>{c.description}</small><span className="genre-count">{profiles.filter(p=>p.categories.includes(c.id)).length}人 {category===c.id?"✓ 選択中":"→"}</span>
-        </button>)}</div>
-        <p className="genre-hint">ジャンル × エリア × キーワードで絞り込み。複数ジャンルに対応するバディもいます。</p>
+
+        <InterviewDiscovery locale={locale} />
+
         <div className="search-panel">
           <label className="keyword-label">{copy.keyword}<input type="search" value={query} onChange={e=>{setQuery(e.target.value);setPage(1);}} placeholder={copy.keywordPlaceholder} /></label>
           <label>{copy.city}<select value={area} onChange={e=>{setArea(e.target.value);setPage(1);}}><option value="">{copy.allAreas}</option>{areas.map(a=><option key={a}>{a}</option>)}{area && area !== "未設定" && !areas.includes(area) && <option>{area}</option>}<option>未設定</option></select></label>
@@ -1273,7 +1214,24 @@ export default function Home() {
             </div>
           </article>
         ))}
-        <BuddySocialConnections buddyId={viewedProfile.id} locale={locale} />
+        {attendantProfiles[viewedProfile.id] && <article className="profile-card">
+          <div className={`directory-image photo-cover ${viewedProfile.kind}`}>
+            <img src={viewedProfile.image} alt={viewedProfile.name} />
+            <CoverBadges profile={viewedProfile} />
+          </div>
+          <div className="profile-copy">
+            <h3>{viewedProfile.name}</h3>
+            <p>{viewedProfile.description}</p>
+            <p className="profile-note">{attendantProfiles[viewedProfile.id].bio}</p>
+            {attendantProfiles[viewedProfile.id].languages && <p className="ucci-language">{attendantProfiles[viewedProfile.id].languages}</p>}
+            <p className="directory-area">{viewedProfile.areas.join(" / ")}</p>
+            <p className="buddy-fee-label">{buddyTerms[locale].passion}</p>
+            <div className="profile-tags">{viewedProfile.tags.map(tag => <span key={tag}>#{tag}</span>)}</div>
+            {profilePrices(viewedProfile)}
+            {attendantProfiles[viewedProfile.id].instagram && <a className="instagram-link" href={`https://www.instagram.com/${attendantProfiles[viewedProfile.id].instagram}/`} target="_blank" rel="noopener noreferrer">Instagram · @{attendantProfiles[viewedProfile.id].instagram} ↗</a>}
+          </div>
+        </article>}
+        <BuddySocialConnections buddyId={viewedProfile.id} locale={locale} instagramAccount={mediaAccount} />
         {viewedProfile && <div className="profile-walk-details">
           <GenreLabels ids={viewedProfile.categories} />
           {walkStory && <section className="walk-story" aria-labelledby="walk-story-title">
@@ -1332,6 +1290,122 @@ export default function Home() {
         </section>}
       </section>
 
+      {publicRequest && <section className="request-options walk-resume" aria-label="進行中の街歩きデモ">
+        <div><p className="request-step">進行中の街歩き · デモ</p><h2>{publicRequest.area} · {publicRequest.duration}</h2><p>{publicRequest.title}</p></div>
+        <button type="button" className="request-apply" onClick={() => focusRequestSection(resumeWalk[1])}>{resumeWalk[0]} →</button>
+      </section>}
+
+      <section className="public-board" id="public-board" aria-labelledby="public-board-title">
+        <div className="public-board-heading"><div><p className="eyebrow">OPEN CALL / FIND A COMPANION</p><h2 id="public-board-title" tabIndex={-1}>同行してほしいBuddyを募る</h2><p>こちらはリスペクトフィーを支払って同行を依頼する利用者さん向けの募集です。行きたい街と希望を公開し、応募したBuddyから1人を選びます。</p></div><span className="public-board-stamp">公開募集<br/>BETA</span></div>
+        {!publicRequest ? <div className="request-compose">
+          <div className="request-compose-copy"><span className="request-step">01 / 利用者として募集する</span><h3>どの街を、どんな人と歩きたいですか？</h3><p>街と日時を入力して、Buddyを募る流れを体験できます。このデモでは募集内容の公開や支払いは発生しません。</p><p>実際の利用では、応募したBuddyのプロフィールと同行料金を確認して1人を選びます。具体的な待ち合わせ場所はマッチ後に共有します。</p></div>
+          {requestReview ? <section className="request-review" aria-labelledby="request-review-title">
+            <p className="request-step">公開前の確認</p>
+            <h3 id="request-review-title" tabIndex={-1}>募集内容を確認する</h3>
+            <dl>
+              <div><dt>Buddyにお願いしたいこと</dt><dd>{requestReview.title}</dd></div>
+              <div><dt>エリア</dt><dd>{requestReview.area}</dd></div>
+              <div><dt>{requestTimeLabel}</dt><dd>{requestReview.when}</dd></div>
+              <div><dt>所要時間</dt><dd>{requestReview.duration}</dd></div>
+              <div><dt>{requestDeadlineLabel}</dt><dd>{requestReview.deadline}</dd></div>
+            </dl>
+            <p className="request-review-note">実際の募集では、依頼者プロフィールと上記の募集内容が公開されます。詳しい待ち合わせ場所はマッチ後のチャットで共有します。</p>
+            <button className="request-publish" type="button" onClick={() => {
+              const id = crypto.randomUUID();
+              const entrySource = currentVintageSource();
+              setPublicRequest({ ...requestReview, id, applicants: [], selected: null, owner: "あなた", entrySource });
+              recordDemo(id, "posted", entrySource);
+              setRequestReview(null);
+              focusRequestSection("request-live-title");
+            }}>デモで募集を表示する <span aria-hidden="true">→</span></button>
+            <button className="request-edit" type="button" onClick={() => {
+              setRequestReview(null);
+              focusRequestSection("request-title");
+            }}>入力内容を修正する</button>
+          </section> : <form className="request-form" onSubmit={reviewRequest} noValidate>
+            {requestSearchNote && <p className="request-search-note" role="status">{requestSearchNote}</p>}
+            <p className="request-draft-note">入力内容はこのタブに下書きとして残ります。</p>
+            <div className="request-examples">
+              <strong>希望を選んで下書きする</strong>
+              {requestTitle.trim() ? <small>入力した文章は下で編集できます。</small> : <div>
+                {[...requestPreferences, ...requestExamples].map(example => <button key={example.label} type="button" onClick={() => {
+                  setRequestTitle(example.title);
+                  clearRequestError("request-title");
+                  focusRequestSection("request-title");
+                }}>{example.label}</button>)}
+              </div>}
+            </div>
+            <div>
+              <label>Buddyにお願いしたいこと<input id="request-title" value={requestTitle}
+                onChange={event => { setRequestTitle(event.target.value); clearRequestError("request-title"); }}
+                placeholder="例：下北沢の古着屋巡りに、詳しいBuddyに付き合ってほしい" maxLength={70}
+                required {...titleFeedback.props} /></label>
+              {titleFeedback.message}
+            </div>
+            <div className="request-form-row">
+              <div>
+                <label>エリア<select id="request-area" value={requestArea}
+                  onChange={event => { setRequestArea(event.target.value); clearRequestError("request-area"); }}
+                  required {...areaFeedback.props}>
+                  <option value="" disabled>エリアを選ぶ</option>
+                  {launchAreas.map(place => <option key={place}>{place}</option>)}
+                </select></label>
+                {areaFeedback.message}
+              </div>
+              <label>{requestTimeLabel}<select id="request-when" value={requestWhen}
+                onChange={event => { setRequestWhen(event.target.value); clearRequestError("request-datetime"); }}>
+                <option>今すぐ</option><option>今日の午後</option><option>日時を指定</option>
+              </select></label>
+            </div>
+            <details className="inline-help"><summary>日時はいつ確定する？</summary><p>ここで入力するのは希望日時です。マッチ成立後、Buddyと相談して待ち合わせを確定します。</p></details>
+            {requestWhen === "日時を指定" && <div>
+              <label>日付と時刻<input id="request-datetime" type="datetime-local" required value={requestDateTime}
+                onChange={event => { setRequestDateTime(event.target.value); clearRequestError("request-datetime"); }}
+                {...dateFeedback.props} /></label>
+              {dateFeedback.message}
+            </div>}
+            <div className="request-form-row">
+              <label>所要時間<select value={requestDuration} onChange={event => setRequestDuration(event.target.value)}>
+                {Object.keys(requestMinutes).map(duration => <option key={duration}>{duration}</option>)}
+              </select></label>
+              <label>{requestDeadlineLabel}<select value={requestDeadline} onChange={event => setRequestDeadline(event.target.value)}>
+                <option>1時間</option><option>6時間</option><option>24時間</option><option>48時間</option>
+              </select></label>
+            </div>
+            <button className="request-publish" type="submit">募集内容を確認する <span aria-hidden="true">→</span></button>
+            <button className="request-edit" type="button" onClick={clearRequestDraft}>下書きを消す</button>
+          </form>}
+        </div> : <div className="request-live">
+          <div className="request-live-main"><span className={`request-status ${publicRequest.selected ? "is-selected" : ""}`}>{publicRequest.selected ? "Buddy決定" : "応募受付中"}</span><h3 id="request-live-title" tabIndex={-1}>{publicRequest.title}</h3><div className="request-owner-profile"><span className="request-owner-avatar">IK</span><span><strong>利用者（依頼者）のプロフィール</strong><small>表示名・プロフィールを応募前に確認できます</small></span></div><div className="request-meta"><span>📍 {publicRequest.area}</span><span>◷ {publicRequest.when} · {publicRequest.duration}</span><span>締切 {publicRequest.deadline}</span></div><p className="location-privacy-note">具体的な待ち合わせ場所は、マッチ成立後にチャットで共有します。</p><p>{publicRequest.selected ? `${publicRequest.selected}さんに決まりました。街歩きの条件を確認しましょう。` : `応募 ${publicRequest.applicants.length}人 · 締切まで応募を受け付けます。`}</p>
+            {!publicRequest.selected && <div className="request-actions">
+              <button className="request-apply" type="button" disabled={publicRequest.applicants.length > 0} onClick={() => {
+                const sample = profiles.find(profile => profile.areas.some(place => place === publicRequest.area || requestAreaAliases[place] === publicRequest.area));
+                setPublicRequest({ ...publicRequest, applicants: [sample ? `${sample.name}（応募デモ）` : "サンプルBuddy"] });
+                recordDemo(publicRequest.id, "applied", publicRequest.entrySource);
+              }}>{publicRequest.applicants.length ? "応募サンプルを追加済み" : "デモ：Buddyからの応募を表示"}</button>
+              {!publicRequest.applicants.length && <button className="request-edit" type="button" onClick={() => {
+                setPublicRequest(null);
+                setRequestSearchNote("募集内容を引き継ぎました。時間を変更して、もう一度試せます。");
+                focusRequestSection("request-when");
+              }}>時間を変えて募集を試す</button>}
+              <small>プロフィールを使った操作例です。本人に応募や通知は発生しません。</small>
+            </div>}
+          </div>
+          <div className="applicant-panel"><span className="request-step">02 / プロフィール・リスペクトフィーを確認して選ぶ</span><h4 id="request-applicants" tabIndex={-1}>応募したBuddy <b>{publicRequest.applicants.length}</b></h4>{publicRequest.applicants.length ? <ul>{publicRequest.applicants.map(name=><li key={name}><span className="applicant-avatar">{name.startsWith("Buddy") ? "B" : name.slice(0,1)}</span><span><strong>{name}</strong><small>応募サンプル · {publicRequest.duration}のリスペクトフィーを確認</small></span>{publicRequest.selected ? <b className="chosen-label">{publicRequest.selected===name?"選択済み":"受付終了"}</b> : <button onClick={() => { setWalkStage("matched"); setPublicRequest({ ...publicRequest, selected: name }); recordDemo(publicRequest.id, "matched", publicRequest.entrySource); focusRequestSection("today-walk-title"); }}>この人を選ぶ</button>}</li>)}</ul> : <p className="no-applicants">応募が届くとここに表示されます。<br/>応募者のプロフィールとリスペクトフィーを確認して1人を選べます。</p>}</div>
+          {publicRequest.selected && <TodayWalk key={publicRequest.id} buddy={selectedDemoProfile?.name ?? publicRequest.selected} suggestedFee={demoFee} area={publicRequest.area}
+            when={publicRequest.when} duration={publicRequest.duration} stage={walkStage} setStage={setWalkStage}
+            onMeet={() => recordDemo(publicRequest.id, "met", publicRequest.entrySource)} />}
+          <button className="request-cancel" onClick={()=>{setPublicRequest(null);clearRequestDraft();}}>募集を終了して新しく作る</button>
+        </div>}
+        <p className="public-board-footnote">※ この画面は機能イメージのプレビューです。募集・応募・決済はまだ実際には送信されません。</p>
+      </section>
+
+      <footer className="buddy-entry-footer">
+            <a className="hero-buddy-application" href="https://shopping-buddy-recruitment.ikkiyokoji.chatgpt.site/" hrefLang="ja">
+              {{ ja: "Buddyとして参加する", en: "Apply to become a Buddy", zh: "申请成为同行伙伴" }[locale]}
+              <span aria-hidden="true">↗</span>
+            </a>
+      </footer>
       <span className="sr-only" role="status">{compareProfiles.length > 0 ? `${comparison.title} · ${compareProfiles.length} / 3 · ${compareProfiles.map(profile => profile.name).join(" · ")}` : ""}</span>
       {compareProfiles.length > 0 && <div className="comparison-dock">
         <button ref={compareDockButton} type="button" onClick={() => compareDialog.current?.showModal()}>
